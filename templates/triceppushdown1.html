@@ -1,0 +1,174 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>NeuroFit AI</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+
+
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="static/assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="static/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="static/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="{% static 'assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/remixicon/remixicon.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="static/assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
+
+
+  <!-- Template Main CSS File -->
+  <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+  <style>
+    #cta {
+      background-image: url('{% static "images/ar.jpg" %}');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+  </style>
+  
+  
+ 
+</head>
+
+<body>
+  <header id="header" class="fixed-top " style="background-color: rgb(77, 75, 75);">
+    <div class="container d-flex align-items-center justify-content-lg-between">
+
+      <h1 class="logo me-auto me-lg-0"><a href="/">NeuroFit AI<span>.</span></a></h1>
+      <!-- Uncomment below if you prefer to use an image logo -->
+      <!-- <a href="index.html" class="logo me-auto me-lg-0"><img src="static/assets/img/logo.png" alt="" class="img-fluid"></a>-->
+
+      <nav id="navbar" class="navbar order-last order-lg-0">
+        <ul>
+          <li><a class="nav-link scrollto active" href="/">Home</a></li>
+          <li><a class="nav-link scrollto" href="/about">About</a></li>
+          <li><a class="nav-link scrollto" href="/services">Services</a></li>
+          <li><a class="nav-link scrollto " href="/gallery">Gallery</a></li>
+          <li><a class="nav-link scrollto" href="/contact">Contact</a></li>
+          <li class="dropdown"><a href="#"><span>Memberships</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a href="/join">Enroll</a></li>
+             
+              <li><a href="#">Workouts</a></li>
+
+              <li><a href="/profile">View Profile</a></li>
+            </ul>
+          </li>
+
+          {% if not request.user.is_authenticated %}
+
+          <li><a class="nav-link scrollto" href="/signup">Signin</a></li>
+         {% else %}
+         <li><a class="nav-link scrollto" href="/logout">Logout</a></li>
+
+
+         {% endif %}
+
+
+
+
+
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav><!-- .navbar -->
+
+      {% if  request.user.is_authenticated %}
+      <a href="/" class="get-started-btn scrollto">Welcome</a>
+      {% endif %}
+    </div>
+  </header>
+ 
+    <section id="exercises" class="exercises">
+        <div class="container" data-aos="fade-up">
+          <div>
+
+            <p style="color: white;">SAMPLE</p>
+            <!-- <p style="color: white;">SAMPLE</p> -->
+            
+          </div>
+        
+          <main id="main">
+
+            <!-- ======= About Section ======= -->
+            <section id="about" class="about">
+              <div class="container" data-aos="fade-up">
+        
+                <div class="section-title">
+                  <h2>EXERCISES</h2>
+                  <p>Tricep Pushdown</p>
+                </div>
+                </div>
+                <div class="container" data-aos="fade-up">
+                    <div class="row">
+                        <!-- Left Column - Exercise Description -->
+                        <div class="col-lg-6 order-1 order-lg-2" data-aos="fade-left" data-aos-delay="100">
+                           
+                            <!-- <p class="fst-italic">
+                                The AI assistant uses cutting-edge technology to detect 33 3D body landmarks, providing precise feedback on your movements.
+                            </p>
+                            <ul>
+                                <li><i class="ri-check-double-line"></i> AI analyzes your posture during workouts, providing instant feedback to ensure correct form and prevent injuries.</li>
+                                <li><i class="ri-check-double-line"></i> Tailored exercise routines based on your fitness level, goals, and preferences, with dynamic adjustments as you progress.</li>
+                            </ul>
+                            <p>
+                                From pose correction to performance metrics, the AI-driven assistant covers all aspects of your workout, optimizing your results.
+                            </p> -->
+            
+                            <!-- How to do Bicep Curl (Steps) -->
+                            <h4>How to Perform Tricep Pushdown</h4>
+                            <ol>
+                                <li> Stand upright facing a cable machine, grasping the bar or rope attachment with a pronated (overhand) grip.</li>
+                                <li> Keep your elbows tucked close to your torso and your upper arms stationary throughout the exercise.</li>
+                                <li> Exhale as you push the bar or rope attachment downward by extending your arms fully, contracting your triceps at the bottom of the movement.</li>
+                                <li> Hold the contracted position briefly, then inhale as you allow the bar or rope to return to the starting position in a controlled manner.</li>
+                                <li> Repeat the movement for the desired number of repetitions, ensuring proper form to maximize effectiveness and minimize strain.</li>
+                            </ol>
+                        </div>
+            
+                        <!-- Right Column - Video -->
+                        <div class="col-lg-6 pt-4 pt-lg-0 order-2 order-lg-1 content" data-aos="fade-right" data-aos-delay="100">
+                            <video width="100%" height="auto" autoplay muted loop>
+                                <source src="{% static 'images/tpvid.webm' %}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </div>
+                </div>
+            </section><!-- End About Section -->
+            
+        <!-- ======= Cta Section ======= --> 
+        <section id="cta" class="cta">
+            <div class="container" data-aos="zoom-in">
+              <div class="text-center">
+                <h3>Ready to Begin Your Workout?</h3>
+                <p>Ready to move? Start now and let the AI guide you to perfect form and peak performance!</p>
+                <!-- <a class="cta-btn" href="#" onclick="startSession()">Start My Session</a> -->
+                <a class="cta-btn" href="#" onclick="window.location.href='/triceppushdown/'; return false;">Start My Session</a>
+              </div>
+            </div>
+          </section>
+          
+          
+        <!-- ======= Portfolio Section ======= -->
+       
+        
+      <!-- Template Main JS File -->
+      <script src="static/assets/js/main.js"></script>  
+</body>
+</html>
+
+ 

@@ -1,0 +1,173 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>NeuroFit AI</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+
+
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="static/assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="static/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="static/assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="{% static 'assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/remixicon/remixicon.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="static/assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
+
+
+  <!-- Template Main CSS File -->
+  <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+
+  
+  
+ 
+</head>
+
+<body>
+  <header id="header" class="fixed-top " style="background-color: rgb(77, 75, 75);">
+    <div class="container d-flex align-items-center justify-content-lg-between">
+
+      <h1 class="logo me-auto me-lg-0"><a href="/">NeuroFit AI<span>.</span></a></h1>
+      <!-- Uncomment below if you prefer to use an image logo -->
+      <!-- <a href="index.html" class="logo me-auto me-lg-0"><img src="static/assets/img/logo.png" alt="" class="img-fluid"></a>-->
+
+      <nav id="navbar" class="navbar order-last order-lg-0">
+        <ul>
+          <li><a class="nav-link scrollto active" href="/">Home</a></li>
+          <li><a class="nav-link scrollto" href="/about">About</a></li>
+          <li><a class="nav-link scrollto" href="/services">Services</a></li>
+          <li><a class="nav-link scrollto " href="/gallery">Gallery</a></li>
+          <li><a class="nav-link scrollto" href="/contact">Contact</a></li>
+          <li class="dropdown"><a href="#"><span>Memberships</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a href="/join">Enroll</a></li>
+             
+              <li><a href="#">Workouts</a></li>
+
+              <li><a href="/profile">View Profile</a></li>
+            </ul>
+          </li>
+
+          {% if not request.user.is_authenticated %}
+
+          <li><a class="nav-link scrollto" href="/signup">Signin</a></li>
+         {% else %}
+         <li><a class="nav-link scrollto" href="/logout">Logout</a></li>
+
+
+         {% endif %}
+
+
+
+
+
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav><!-- .navbar -->
+
+      {% if  request.user.is_authenticated %}
+      <a href="/" class="get-started-btn scrollto">Welcome</a>
+      {% endif %}
+    </div>
+  </header>
+    <section id="exercises" class="exercises">
+        <div class="container" data-aos="fade-up">
+          <div>
+            <p style="color: white;">SAMPLE</p>
+            <!-- <p style="color: white;">SAMPLE</p> -->
+            
+          </div>
+      <!-- ======= Cta Section ======= -->
+       <!-- ======= Services Section ======= -->
+    <section id="services" class="services">
+      <div class="container" data-aos="fade-up">
+
+        <div class="section-title">
+          <h2>EXERCISES</h2>
+          <p>FULL BODY</p>
+        </div>
+
+        <div class="row">
+          <!-- Bicep Curl -->
+          <div class="col-lg-4 col-md-6 d-flex align-items-stretch" data-aos="zoom-in" data-aos-delay="100">
+            <div class="icon-box">
+              <div class="icon">
+                <img src="{% static 'assets/icons/russian.png' %}" alt="Bicep Curl Icon" style="width: 64px; height: 64px;">
+              </div>
+              <h4><a href="/russiantwist1">Russian Twist</a></h4>
+              <p>Twist and sculpt your oblique line,
+                Balance and strength will intertwine.
+                Rotate with control, build your core,
+                Every turn helps you define</p>
+            </div>
+          </div>
+          
+
+
+
+          <div class="col-lg-4 col-md-6 d-flex align-items-stretch mt-4 mt-md-0" data-aos="zoom-in" data-aos-delay="200">
+            <div class="icon-box">
+              <div class="icon">
+                <img src="{% static 'assets/icons/lateralpulldown.png' %}" alt="Bicep Curl Icon" style="width: 54px; height: 54px;">
+              </div>
+              <h4><a href="/lateralpulldown1">Lateral Pulldown</a></h4>
+              <p>Pull down strong, activate your back,
+                Feel the muscles stretch and pack.
+                Engage your lats, build them wide,
+                Lat pulldowns strengthen your track!</p>
+            </div>
+          </div>
+
+          {% comment %} <div class="col-lg-4 col-md-6 d-flex align-items-stretch mt-4 mt-lg-0" data-aos="zoom-in" data-aos-delay="300">
+            <div class="icon-box">
+              <div class="icon"><img src="{% static 'assets/icons/triceps.png' %}" alt="Bicep Curl Icon" style="width: 54px; height: 54px;"></div>
+              <h4><a href="/tricepdip1">Tricep Dips</a></h4>
+              <p>Push limits! Engage and tone your triceps for sleek, sculpted arms with controlled movements, strengthening the entire upper body.</p>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-6 d-flex align-items-stretch mt-4 mt-lg-0" data-aos="zoom-in" data-aos-delay="300">
+            <div class="icon-box">
+              <div class="icon"><img src="{% static 'assets/icons/triceppush.png' %}" alt="Bicep Curl Icon" style="width: 54px; height: 54px;"></div>
+              <h4><a href="/tricepdip1">Tricep PushDown</a></h4>
+              <p>Push limits! Tone and strengthen your triceps with controlled movements for a sleek, powerful arm transformation.</p>
+            </div>
+          </div> {% endcomment %}
+
+
+        </div>
+
+      </div>
+    </section><!-- End Services Section -->
+
+      
+  
+      <!-- ======= Portfolio Section ======= -->
+     
+      <!-- ======= Contact Section ======= -->
+      <script src="static/assets/vendor/purecounter/purecounter_vanilla.js"></script>
+      <script src="static/assets/vendor/aos/aos.js"></script>
+      <script src="static/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+      <script src="static/assets/vendor/glightbox/js/glightbox.min.js"></script>
+      <script src="static/assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+      <script src="static/assets/vendor/swiper/swiper-bundle.min.js"></script>
+      <script src="static/assets/vendor/php-email-form/validate.js"></script>
+    
+      <!-- Template Main JS File -->
+      <script src="static/assets/js/main.js"></script>  
+</body>
+</html>
+

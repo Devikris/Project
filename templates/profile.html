@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Profile
+{% endblock title %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+
+        <!-- Enrollment Details Section -->
+        <div class="col-md-4">
+            <h1>Enrollment Details</h1>
+            {% for post in posts %}
+            <ul class="list-group">
+                <li class="list-group-item bg-warning text-dark"><h5>Name : {{ post.FullName }}</h5></li>
+                <li class="list-group-item bg-warning text-dark"><h5>Email : {{ post.Email }}</h5></li>
+                <li class="list-group-item bg-warning text-dark"><h5>Gender : {{ post.Gender }}</h5></li>
+                <li class="list-group-item bg-warning text-dark"><h5>Phone Number : {{ post.PhoneNumber }}</h5></li>
+                <li class="list-group-item bg-warning text-dark"><h5>DOB : {{ post.DOB }}</h5></li>
+                <li class="list-group-item bg-warning text-dark"><h5>Membership Plan : {{ post.SelectMembershipplan }}</h5></li>
+                <li class="list-group-item bg-warning text-dark"><h5>Reference : {{ post.Reference }}</h5></li>
+                <li class="list-group-item bg-warning text-dark"><h5>Address : {{ post.Address }}</h5></li>
+                <li class="list-group-item bg-warning text-dark"><h5>Payment Status : {{ post.paymentStatus }}</h5></li>
+                <li class="list-group-item bg-warning text-dark"><h5>Amount Paid : {{ post.Price }}</h5></li>
+                <li class="list-group-item bg-warning text-dark"><h5>Upcoming Due Date : {{ post.DueDate }}</h5></li>
+                <li class="list-group-item bg-warning text-dark"><h5>Joining Date : {{ post.timeStamp }}</h5></li>
+            </ul>
+            {% endfor %}
+        </div>
+
+        <!-- Attendance Data Section -->
+        <div class="col-md-8">
+            <div>
+                <center><h2 class="display-4 mt-3"><b>Attendance and Exercise Data</b></h2></center>
+            </div>
+        
+            <table class="table">
+                <thead class="thead-warning">
+                    <tr>
+                        <th scope="col">Date</th>
+                        <th scope="col">Login</th>
+                        <th scope="col">Logout</th>
+                        <th scope="col">Workout</th>
+                        <th scope="col">Exercise</th>
+                        <th scope="col">Reps</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attend in attendance %}
+                    <tr>
+                        <td>{{ attend.Selectdate }}</td>
+                        <td>{{ attend.Login }}</td>
+                        <td>{{ attend.Logout }}</td>
+                        <td>{{ attend.SelectWorkout }}</td>
+                        <td>
+                            {% for log in exercise_logs %}
+                                {% if log.date == attend.Selectdate %}
+                                    {{ log.exercise_name }}
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for log in exercise_logs %}
+                                {% if log.date == attend.Selectdate %}
+                                    {{ log.repetition_count }}
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Exercise Logs Section -->
+        <div class="col-md-12 mt-4">
+            <h3>Exercise Logs</h3>
+            {% if exercise_logs %}
+                <ul class="list-group">
+                {% for log in exercise_logs %}
+                    <li class="list-group-item">
+                        {{ log.exercise_name }} - Reps: {{ log.repetition_count }} - Date: {{ log.date }}
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>No exercise logs available.</p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock body %}
+    
