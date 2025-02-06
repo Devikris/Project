@@ -174,7 +174,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                 correct_count += 1
             else:
                 incorrect_count += 1
-
+            elapsed_time=0
             elapsed_time = int(time.time() - timer_start)
 
             if elapsed_time // 30 > last_motivation_time // 30:
