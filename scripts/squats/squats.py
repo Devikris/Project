@@ -267,7 +267,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             speak(f"While performing the session in future, consider to {most_frequent_feedback}")
             cv2.waitKey(1000)
 
-            cv2.putText(frame, "Press Q to see Performance Graph.", (700, 800), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
+            cv2.putText(frame, "Press Q to see Performance Graph.", (500, 700), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)#(length,height)
             speak("Press Q to move to see the  Performance graph")
             cv2.imshow('Mediapipe Feed', frame)
 
