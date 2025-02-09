@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
-from authapp.models import Contact,MembershipPlan,Trainer,Enrollment,Gallery,Attendance,Biceptricep,BicepCurl,ShoulderPress,TricepDip,TricepPushdown,Legs,Squat,Deadlift,Chests,Body,Pushup,Lateralraise,Russiantwist,Lateralpulldown,Legraise,Shoulder
+from authapp.models import Contact,MembershipPlan,Trainer,Enrollment,Gallery,Attendance,Biceptricep,BicepCurl,ShoulderPress,TricepDip,TricepPushdown,Legs,Squat,Deadlift,Chests,Body,Pushup,Lateralraise,Russiantwist,Lateralpulldown,Legraise,Shoulder,Benchpress,Hammercurl
 import os
 import subprocess
 from django.http import HttpResponse
@@ -190,10 +190,23 @@ def biceps_pose(request):
     except Exception as e:
         # Handle errors gracefully and return the error message
         return HttpResponse(f"Error occurred: {str(e)}")
-    
+def hammercurl(request):
+    # Construct the absolute path to the lateralraise.py script
+    script_path = os.path.join(os.path.dirname(__file__), '../scripts/hammercurl/hammercurl.py')
+
+    try:
+        # Use subprocess to execute the script
+        subprocess.run(["python", script_path], check=True)
+        
+        # Redirect to the homepage or any other view you want
+        return redirect('Home')  # 'Home' is the name of the homepage view or URL pattern
+    except Exception as e:
+        # Handle errors gracefully and return the error message
+        return HttpResponse(f"Error occurred: {str(e)}")
+       
 def benchpress(request):
     # Construct the absolute path to the biceps.py script
-    script_path = os.path.join(os.path.dirname(__file__), '../scripts/bicep/benchpress.py')
+    script_path = os.path.join(os.path.dirname(__file__), '../scripts/benchpress/benchpress.py')
 
     try:
         # Use subprocess to execute the script
@@ -492,3 +505,9 @@ def topushuppage(request):
 def tolateralraisepage(request):
     shoulder=Lateralraise.objects.all()
     return render(request, 'lateralraise1.html',{'tolateralraisepage':tolateralraisepage})
+def tobenchpresspage(request):
+    chests=Benchpress.objects.all()
+    return render(request, 'benchpress1.html',{'tobenchpresspage':tobenchpresspage})
+def tohammercurlpage(request):
+    biceptricep=Biceptricep.objects.all()
+    return render(request, 'hammercurl1.html',{'tohammercurlpage':tohammercurlpage})

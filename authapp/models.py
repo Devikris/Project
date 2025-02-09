@@ -207,3 +207,9 @@ class Lateralpulldown(models.Model):
 class Legraise(models.Model):
     name=models.CharField(max_length=100)
     category=models.CharField(max_length=50)    
+class Benchpress(models.Model):
+    name=models.CharField(max_length=100)
+    category=models.CharField(max_length=50) 
+class Hammercurl(models.Model):
+    name=models.CharField(max_length=100)
+    category=models.CharField(max_length=50)
