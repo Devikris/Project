@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
-from authapp.models import Contact,MembershipPlan,Trainer,Enrollment,Gallery,Attendance,Biceptricep,BicepCurl,ShoulderPress,TricepDip,TricepPushdown,Legs,Squat,Deadlift,Chests,Body,Pushup,Lateralraise,Russiantwist,Lateralpulldown,Legraise,Shoulder,Benchpress,Hammercurl
+from authapp.models import Contact,MembershipPlan,Trainer,Enrollment,Gallery,Attendance,Biceptricep,BicepCurl,ShoulderPress,TricepDip,TricepPushdown,Legs,Squat,Deadlift,Chests,Body,Pushup,Lateralraise,Russiantwist,Lateralpulldown,Legraise,Shoulder,Benchpress,Hammercurl,Pullup
 import os
 import subprocess
 from django.http import HttpResponse
@@ -308,7 +308,20 @@ def shoulderpress(request):
     except Exception as e:
         # Handle errors gracefully and return the error message
         return HttpResponse(f"Error occurred: {str(e)}")
-    
+
+def pullup(request):
+    # Construct the absolute path to the lateralraise.py script
+    script_path = os.path.join(os.path.dirname(__file__), '../scripts/pullup/pullup.py')
+
+    try:
+        # Use subprocess to execute the script
+        subprocess.run(["python", script_path], check=True)
+        
+        # Redirect to the homepage or any other view you want
+        return redirect('Home')  # 'Home' is the name of the homepage view or URL pattern
+    except Exception as e:
+        # Handle errors gracefully and return the error message
+        return HttpResponse(f"Error occurred: {str(e)}")
 WATCH_MAC_ADDRESS = "31:E5:D2:5E:3B:19"  # Replace with your MAC address
 
 
@@ -509,5 +522,8 @@ def tobenchpresspage(request):
     chests=Benchpress.objects.all()
     return render(request, 'benchpress1.html',{'tobenchpresspage':tobenchpresspage})
 def tohammercurlpage(request):
-    biceptricep=Biceptricep.objects.all()
+    biceptricep=Hammercurl.objects.all()
     return render(request, 'hammercurl1.html',{'tohammercurlpage':tohammercurlpage})
+def topulluppage(request):
+    biceptricep=Pullup.objects.all()
+    return render(request, 'pullup1.html',{'topulluppage':topulluppage})

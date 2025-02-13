@@ -213,3 +213,7 @@ class Benchpress(models.Model):
 class Hammercurl(models.Model):
     name=models.CharField(max_length=100)
     category=models.CharField(max_length=50)
+
+class Pullup(models.Model):
+    name=models.CharField(max_length=100)
+    category=models.CharField(max_length=50)

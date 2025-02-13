@@ -19,6 +19,7 @@ urlpatterns = [
     path('squats/', views.squats, name='squats'),
     path('legraise/', views.legraise, name='legraise'),
     path('shoulderpress/', views.shoulderpress, name='shoulderpress'),
+    path('pullup/' ,views.pullup, name='pullup'),
     path('api/', include('exercise_log.urls')),
     path('russiantwist/', views.russiantwist, name='russiantwist'),
     path('tricepdips/', views.tricepdips, name='tricepdips'),
@@ -44,6 +45,7 @@ urlpatterns = [
     path('lateralraise1/' ,views.tolateralraisepage, name='tolateralraisepage'),
     path('benchpress1/', views.tobenchpresspage, name='tobenchpresspage'),
     path('hammercurl1/', views.tohammercurlpage, name='tohammercurlpage'),
+    path('pullup1/' ,views.topulluppage, name='topulluppage'),
  # URL for biceps pose
 
     
