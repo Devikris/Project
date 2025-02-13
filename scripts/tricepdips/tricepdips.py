@@ -364,10 +364,11 @@ def calculate_angle(a, b, c):
 
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
+elapsed_time=0
 
 cap = cv2.VideoCapture(0)
 counter, stage = 0, None
-timer_start = time.time()
+
 last_motivation_time = 0
 cool_off_seconds = 5
 
@@ -383,6 +384,7 @@ for i in range(cool_off_seconds, 0, -1):
         cv2.destroyAllWindows()
         exit()
 speak("Start!")
+timer_start = time.time()
 
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
     feedback_counts = {}
