@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
-from authapp.models import Contact,MembershipPlan,Trainer,Enrollment,Gallery,Attendance,Biceptricep,BicepCurl,ShoulderPress,TricepDip,TricepPushdown,Legs,Squat,Deadlift,Chests,Body,Pushup,Lateralraise,Russiantwist,Lateralpulldown,Legraise,Shoulder,Benchpress,Hammercurl,Pullup,Inclinebenchpress,Declinebenchpress,Chestflymachine,Romaniandeadlift2
+from authapp.models import Contact,MembershipPlan,Trainer,Enrollment,Gallery,Attendance,Biceptricep,BicepCurl,ShoulderPress,TricepDip,TricepPushdown,Legs,Squat,Deadlift,Chests,Body,Pushup,Lateralraise,Russiantwist,Lateralpulldown,Legraise,Shoulder,Benchpress,Hammercurl,Pullup,Inclinebenchpress,Declinebenchpress,Chestflymachine,Romaniandeadlift2,Plank,Tbarrow,Hipthrust,Legextension
 import os
 import subprocess
 from django.http import HttpResponse
@@ -543,3 +543,20 @@ def tochestflymachine(request):
 def toromaniandeadlift2(request):
     shoulder=Romaniandeadlift2.objects.all()
     return render(request, 'romaniandeadlift.html',{'toromaniandeadlift2':toromaniandeadlift2})
+def toplank(request):
+    shoulder=Plank.objects.all()
+    return render(request, 'plank.html',{'toplank':toplank})
+
+def totbarrow(request):
+    shoulder=Tbarrow.objects.all()
+    return render(request, 'tbarrow.html',{'totbarrow':totbarrow})
+
+def tohipthrust(request):
+    shoulder=Hipthrust.objects.all()
+    return render(request, 'hipthrust.html',{'tohipthrust':tohipthrust})
+
+def tolegextension(request):
+    shoulder=Legextension.objects.all()
+    return render(request, 'legextension.html',{'tolegextension':tolegextension})
+
+

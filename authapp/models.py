@@ -235,3 +235,19 @@ class Romaniandeadlift2(models.Model):
     name=models.CharField(max_length=100)
     category=models.CharField(max_length=50)
     
+class Plank(models.Model):
+    name=models.CharField(max_length=100)
+    category=models.CharField(max_length=50)
+
+class Tbarrow(models.Model):
+    name=models.CharField(max_length=100)
+    category=models.CharField(max_length=50)
+
+
+class Hipthrust(models.Model):
+    name=models.CharField(max_length=100)
+    category=models.CharField(max_length=50)
+
+class Legextension(models.Model):
+    name=models.CharField(max_length=100)
+    category=models.CharField(max_length=50)
