@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
-from authapp.models import Contact,MembershipPlan,Trainer,Enrollment,Gallery,Attendance,Biceptricep,BicepCurl,ShoulderPress,TricepDip,TricepPushdown,Legs,Squat,Deadlift,Chests,Body,Pushup,Lateralraise,Russiantwist,Lateralpulldown,Legraise,Shoulder,Benchpress,Hammercurl,Pullup
+from authapp.models import Contact,MembershipPlan,Trainer,Enrollment,Gallery,Attendance,Biceptricep,BicepCurl,ShoulderPress,TricepDip,TricepPushdown,Legs,Squat,Deadlift,Chests,Body,Pushup,Lateralraise,Russiantwist,Lateralpulldown,Legraise,Shoulder,Benchpress,Hammercurl,Pullup,Inclinebenchpress,Declinebenchpress,Chestflymachine,Romaniandeadlift2
 import os
 import subprocess
 from django.http import HttpResponse
@@ -433,7 +433,7 @@ def triceppushdown(request):
 
 
 
-def romaniandeadlift(request):
+def deadlift(request):
     # Construct the absolute path to the script and the video file
     script_path = os.path.join(os.path.dirname(__file__), '../scripts/romaniandeadlift/romaniandeadlift.py')
     video_path = os.path.join(os.path.dirname(script_path), 'romaniandeadlift_5.mp4')  # Video path in the same folder
@@ -527,3 +527,19 @@ def tohammercurlpage(request):
 def topulluppage(request):
     biceptricep=Pullup.objects.all()
     return render(request, 'pullup1.html',{'topulluppage':topulluppage})
+
+def toinclinebenchpress(request):
+    shoulder=Inclinebenchpress.objects.all()
+    return render(request, 'inclinebenchpress.html',{'toinclinebenchpress':toinclinebenchpress})
+
+def todeclinebenchpress(request):
+    shoulder=Declinebenchpress.objects.all()
+    return render(request, 'declinebenchpress.html',{'todeclinebenchpress':todeclinebenchpress})
+
+def tochestflymachine(request):
+    shoulder=Chestflymachine.objects.all()
+    return render(request, 'chestflymachine.html',{'tochestflymachine':tochestflymachine})
+
+def toromaniandeadlift2(request):
+    shoulder=Romaniandeadlift2.objects.all()
+    return render(request, 'romaniandeadlift.html',{'toromaniandeadlift2':toromaniandeadlift2})

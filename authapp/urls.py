@@ -24,7 +24,7 @@ urlpatterns = [
     path('russiantwist/', views.russiantwist, name='russiantwist'),
     path('tricepdips/', views.tricepdips, name='tricepdips'),
     path('triceppushdown/', views.triceppushdown, name='triceppushdown'),
-    path('romaniandeadlift/', views.romaniandeadlift, name='romaniandeadlift'),
+    path('deadlift/', views.deadlift, name='deadlift'),
     path('lateralpulldown/', views.lateralpulldown, name='lateralpulldown'),
     path('CHEST/' , views.ExerciseLog, name='exercises'),
     path('exercisesbicep/', views.exercise_list, name='exercise_list'),
@@ -46,6 +46,11 @@ urlpatterns = [
     path('benchpress1/', views.tobenchpresspage, name='tobenchpresspage'),
     path('hammercurl1/', views.tohammercurlpage, name='tohammercurlpage'),
     path('pullup1/' ,views.topulluppage, name='topulluppage'),
+    path('inclinebenchpress/' ,views.toinclinebenchpress, name='toinclinebenchpress'),
+    path('declinebenchpress/' ,views.todeclinebenchpress, name='todeclinebenchpress'),
+    path('chestflymachine/' ,views.tochestflymachine, name='tochestflymachine'),
+    path('romaniandeadlift2/' ,views.toromaniandeadlift2, name='toromaniandeadlift2'),
+ 
  # URL for biceps pose
 
     

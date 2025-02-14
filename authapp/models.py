@@ -217,3 +217,21 @@ class Hammercurl(models.Model):
 class Pullup(models.Model):
     name=models.CharField(max_length=100)
     category=models.CharField(max_length=50)
+
+
+class Inclinebenchpress(models.Model):
+    name=models.CharField(max_length=100)
+    category=models.CharField(max_length=50)
+
+class Declinebenchpress(models.Model):
+    name=models.CharField(max_length=100)
+    category=models.CharField(max_length=50)
+
+class Chestflymachine(models.Model):
+    name=models.CharField(max_length=100)
+    category=models.CharField(max_length=50)
+
+class Romaniandeadlift2(models.Model):
+    name=models.CharField(max_length=100)
+    category=models.CharField(max_length=50)
+    
