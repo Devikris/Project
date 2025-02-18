@@ -376,7 +376,7 @@ cv2.namedWindow('Mediapipe Feed', cv2.WND_PROP_FULLSCREEN)
 cv2.setWindowProperty('Mediapipe Feed', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 for i in range(cool_off_seconds, 0, -1):
     frame = np.zeros((1080, 1920, 3), dtype=np.uint8)
-    cv2.putText(frame, f"Starting in {i}s...", (700, 540), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 4)
+    cv2.putText(frame, f"Starting in {i}s...", (700, 540), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 4, cv2.LINE_AA)
     cv2.imshow('Mediapipe Feed', frame)
     speak(f"{i}")
     if cv2.waitKey(1000) & 0xFF == ord('q'):
@@ -436,7 +436,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                     else:
                         feedback_counts[predicted_feedback] = 1
 
-                    if "Good" in predicted_feedback:
+                    if "Great" in predicted_feedback:
                        correct_count += 1
                     else:
                         incorrect_count += 1
@@ -483,12 +483,14 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                         cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
             cv2.imshow('Mediapipe Feed', frame)
             speak(f"The total repetitions are {counter} times")
-            speak("Press Q to move to see the  Performance graph")
-            cv2.imshow('Mediapipe Feed', frame)
             cv2.putText(frame, f"Feedback: {most_frequent_feedback}", (500, 600), 
             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
             cv2.imshow('Mediapipe Feed', frame)
             speak(f"While performing the session in future, consider to {most_frequent_feedback}")
+            cv2.putText(frame, "Press Q to see Performance Graph.", (600, 700), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
+            speak("Press Q to move to see the  Performance graph")
+            cv2.imshow('Mediapipe Feed', frame)
+            
             
 
             while True:
@@ -500,14 +502,6 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                     cv2.destroyAllWindows()
                     exit()
 
-            # cv2.putText(frame, f"Feedback: {random_feedback}", (500, 600), 
-            #             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
-            # cv2.imshow('Mediapipe Feed', frame)
-            # speak(f"While performing the session in future, consider to {random_feedback}")
-            # cv2.putText(frame, f"Feedback: {most_frequent_feedback}", (500, 600), 
-            # cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
-            # cv2.imshow('Mediapipe Feed', frame)
-            # speak(f"While performing the session in future, consider to {most_frequent_feedback}")
             
         elif key == ord('p'):
             if paused:

@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 # import random
 
 # Text-to-speech engine setup
+elapsed_time=0
 engine = pyttsx3.init()
 engine.setProperty('rate', 150)  # Speed of speech
 engine.setProperty('volume', 1.0)  # Volume level
@@ -249,17 +250,13 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             speak(f"The total repetitions are {counter} times")
             cv2.waitKey(1000)
 
-            # cv2.putText(frame, f"Feedback: {random_feedback}", (500, 600), 
-            #             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
-            # cv2.imshow('Mediapipe Feed', frame)
-            # speak(f"While performing the session in future, consider to {random_feedback}")
             cv2.putText(frame, f"Feedback: {most_frequent_feedback}", (500, 600), 
             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
             cv2.imshow('Mediapipe Feed', frame)
             speak(f"While performing the session in future, consider to {most_frequent_feedback}")
             cv2.waitKey(1000)
 
-            cv2.putText(frame, "Press Q to see Performance Graph.", (700, 800), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
+            cv2.putText(frame, "Press Q to see Performance Graph.", (500, 700), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
             speak("Press Q to move to see the  Performance graph")
             cv2.imshow('Mediapipe Feed', frame)
 

@@ -105,14 +105,6 @@ stage = None
 timer_start = time.time()  # Start the timer when the program starts
 last_motivation_time = 0  # To track the last motivational message time
 
-# Random feedback for improvement
-# feedback_list = [
-#     "Try to keep your back straight during the curls!",
-#     "Focus on controlling your movement to improve form!",
-#     "Keep your elbows steady and close to your torso!",
-#     "Avoid swinging your arms for better results!",
-#     "Maintain a consistent pace for effective repetitions!"
-# ]
 
 # Set up MediaPipe Pose instance
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
@@ -178,7 +170,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             else:
                 feedback_counts[predicted_feedback] = 1
 
-            if "Good" in predicted_feedback:
+            if "Great" in predicted_feedback:
                 correct_count += 1
             else:
                 incorrect_count += 1
@@ -231,9 +223,6 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             total_time = int(time.time() - timer_start)
             minutes = total_time // 60
             seconds = total_time % 60
-
-            # random_feedback = random.choice(feedback_list)
-            # Find the most frequent feedback
             most_frequent_feedback = max(feedback_counts, key=feedback_counts.get)
 
 
@@ -257,10 +246,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             speak(f"The total repetitions are {counter} times")
             cv2.waitKey(1000)
 
-            # cv2.putText(frame, f"Feedback: {random_feedback}", (500, 600), 
-            #             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
-            # cv2.imshow('Mediapipe Feed', frame)
-            # speak(f"While performing the session in future, consider to {random_feedback}")
+            
             cv2.putText(frame, f"Feedback: {most_frequent_feedback}", (500, 600), 
             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
             cv2.imshow('Mediapipe Feed', frame)

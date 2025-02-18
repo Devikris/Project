@@ -18,15 +18,15 @@ def speak(text):
 
 # Define paths to the model and label encoder
 base_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(base_dir, 'mlp_model_pullups.pkl')
-label_encoder_path = os.path.join(base_dir, 'label_encoder_pullups.pkl')
+model_path = os.path.join(base_dir, 'mlp_model_leg_extension.pkl')
+label_encoder_path = os.path.join(base_dir, 'label_encoder_leg_extension.pkl')
 
 # Load trained model and label encoder
 if os.path.exists(model_path) and os.path.exists(label_encoder_path):
     model = joblib.load(model_path)
     label_encoder = joblib.load(label_encoder_path)
 else:
-    raise FileNotFoundError("One or both .pkl files are missing for Pull-ups.")
+    raise FileNotFoundError("One or both .pkl files are missing for Leg Extensions.")
 screen_width = 1920  # Example for 1920px width
 screen_height = 1080  # Example for 1080px height
 
@@ -102,25 +102,25 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                     def get_coords(landmark):
                         return [landmark.x * frame.shape[1], landmark.y * frame.shape[0]]
 
-                    left_shoulder = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value])
-                    left_elbow = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value])
-                    left_wrist = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value])
+                    left_hip = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_HIP.value])
+                    left_knee = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value])
+                    left_ankle = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value])
 
-                    elbow_angle = calculate_angle(left_shoulder, left_elbow, left_wrist)
+                    knee_angle = calculate_angle(left_hip, left_knee, left_ankle)
 
-                    cv2.putText(image, f"Elbow Angle: {int(elbow_angle)}",
-                                tuple(np.multiply(left_elbow, [640, 480]).astype(int)),
+                    cv2.putText(image, f"Knee Angle: {int(knee_angle)}",
+                                tuple(np.multiply(left_knee, [640, 480]).astype(int)),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
 
-                    if elbow_angle > 160:
+                    if knee_angle > 160:
                         stage = "down"
-                    if elbow_angle < 90 and stage == "down":
+                    if knee_angle < 90 and stage == "down":
                         stage = "up"
                         counter += 1
                         speak(f"{counter}")
                         print(f"Reps: {counter}")
 
-                    input_features = np.array([elbow_angle]).reshape(1, -1)
+                    input_features = np.array([knee_angle]).reshape(1, -1)
                     predicted_feedback_encoded = model.predict(input_features)[0]
                     predicted_feedback = label_encoder.inverse_transform([predicted_feedback_encoded])[0]
                     print(f"Feedback: {predicted_feedback}")
@@ -130,7 +130,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                     else:
                         feedback_counts[predicted_feedback] = 1
 
-                    if predicted_feedback is None:
+                    if "Great" in predicted_feedback:
                        correct_count += 1
                     else:
                         incorrect_count += 1
@@ -181,7 +181,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
             cv2.imshow('Mediapipe Feed', frame)
             speak(f"While performing the session in future, consider to {most_frequent_feedback}")
-            cv2.putText(frame, "Press Q to see Performance Graph.", (500, 700), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
+            cv2.putText(frame, "Press Q to see Performance Graph.", (600, 700), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
             speak("Press Q to move to see the  Performance graph")
             cv2.imshow('Mediapipe Feed', frame)
             
@@ -195,6 +195,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                     cap.release()
                     cv2.destroyAllWindows()
                     exit()
+
             
         elif key == ord('p'):
             if paused:

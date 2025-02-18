@@ -295,6 +295,20 @@ def legraise(request):
         # Handle errors gracefully and return the error message
         return HttpResponse(f"Error occurred: {str(e)}")
     
+def legextension(request):
+    # Construct the absolute path to the lateralraise.py script
+    script_path = os.path.join(os.path.dirname(__file__), '../scripts/legextension/legextension.py')
+
+    try:
+        # Use subprocess to execute the script
+        subprocess.run(["python", script_path], check=True)
+        
+        # Redirect to the homepage or any other view you want
+        return redirect('Home')  # 'Home' is the name of the homepage view or URL pattern
+    except Exception as e:
+        # Handle errors gracefully and return the error message
+        return HttpResponse(f"Error occurred: {str(e)}")
+    
 def shoulderpress(request):
     # Construct the absolute path to the lateralraise.py script
     script_path = os.path.join(os.path.dirname(__file__), '../scripts/shoulderpress/shoulderpress.py')
@@ -322,6 +336,8 @@ def pullup(request):
     except Exception as e:
         # Handle errors gracefully and return the error message
         return HttpResponse(f"Error occurred: {str(e)}")
+    
+    
 WATCH_MAC_ADDRESS = "31:E5:D2:5E:3B:19"  # Replace with your MAC address
 
 
@@ -549,14 +565,14 @@ def toplank(request):
 
 def totbarrow(request):
     shoulder=Tbarrow.objects.all()
-    return render(request, 'tbarrow.html',{'totbarrow':totbarrow})
+    return render(request, 'tbarrow1.html',{'totbarrow':totbarrow})
 
 def tohipthrust(request):
     shoulder=Hipthrust.objects.all()
-    return render(request, 'hipthrust.html',{'tohipthrust':tohipthrust})
+    return render(request, 'hipthrust1.html',{'tohipthrust':tohipthrust})
 
 def tolegextension(request):
     shoulder=Legextension.objects.all()
-    return render(request, 'legextension.html',{'tolegextension':tolegextension})
+    return render(request, 'legextension1.html',{'tolegextension':tolegextension})
 
 
