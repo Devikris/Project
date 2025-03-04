@@ -107,10 +107,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             predicted_feedback_encoded = model.predict(input_features)[0]
             predicted_feedback = label_encoder.inverse_transform([predicted_feedback_encoded])[0]
 
-            # Display the feedback
-            # cv2.putText(image, f"Feedback: {predicted_feedback}", 
-            #             (10, 100), 
-            #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
+          
             cv2.putText(image, f"Feedback: {predicted_feedback}", 
                         (30, 100), 
                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2, cv2.LINE_AA)

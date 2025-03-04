@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
-from authapp.models import Contact,MembershipPlan,Trainer,Enrollment,Gallery,Attendance,Biceptricep,BicepCurl,ShoulderPress,TricepDip,TricepPushdown,Legs,Squat,Deadlift,Chests,Body,Pushup,Lateralraise,Russiantwist,Lateralpulldown,Legraise,Shoulder,Benchpress,Hammercurl,Pullup,Inclinebenchpress,Declinebenchpress,Chestflymachine,Romaniandeadlift2,Plank,Tbarrow,Hipthrust,Legextension
+from authapp.models import Contact,MembershipPlan,Trainer,Enrollment,Gallery,Attendance,Biceptricep,BicepCurl,ShoulderPress,TricepDip,TricepPushdown,Legs,Squat,Deadlift,Chests,Body,Pushup,Lateralraise,Russiantwist,Lateralpulldown,Legraise,Shoulder,Benchpress,Hammercurl,Pullup,Inclinebenchpress,Declinebenchpress,Chestflymachine,Romaniandeadlift,Plank,Tbarrow,Hipthrust,Legextension
 import os
 import subprocess
 from django.http import HttpResponse
@@ -203,7 +203,21 @@ def hammercurl(request):
     except Exception as e:
         # Handle errors gracefully and return the error message
         return HttpResponse(f"Error occurred: {str(e)}")
-       
+def hipthrust(request):
+    # Construct the absolute path to the lateralraise.py script
+    script_path = os.path.join(os.path.dirname(__file__), '../scripts/hipthrust/hipthrust.py')
+
+    try:
+        # Use subprocess to execute the script
+        subprocess.run(["python", script_path], check=True)
+        
+        # Redirect to the homepage or any other view you want
+        return redirect('Home')  # 'Home' is the name of the homepage view or URL pattern
+    except Exception as e:
+        # Handle errors gracefully and return the error message
+        return HttpResponse(f"Error occurred: {str(e)}")
+    
+
 def benchpress(request):
     # Construct the absolute path to the biceps.py script
     script_path = os.path.join(os.path.dirname(__file__), '../scripts/benchpress/benchpress.py')
@@ -218,22 +232,7 @@ def benchpress(request):
         # Handle errors gracefully and return the error message
         return HttpResponse(f"Error occurred: {str(e)}")
     
-    #squats
-# def chest(request):
-#     # Construct the absolute path to the biceps.py script
-#     script_path = os.path.join(os.path.dirname(__file__), '../scripts/chest/chestt.py')
-#     video_path = os.path.join(os.path.dirname(script_path), 'push-up_0.mp4')
-
-#     try:
-#         # Use subprocess to execute the script
-#         subprocess.run(["python", script_path], check=True)
-        
-#         # Redirect to the homepage or any other view you want
-#         return redirect('Home')  # 'home' is the name of the homepage view or URL pattern
-#     except Exception as e:
-#         # Handle errors gracefully and return the error message
-#         return HttpResponse(f"Error occurred: {str(e)}")
-
+    
 def chest(request):
     # Construct the absolute path to the chestt.py script
     script_path = os.path.join(os.path.dirname(__file__), '../scripts/chest/chestt.py')
@@ -264,8 +263,7 @@ def lateralraise(request):
         return redirect('Home')  # 'Home' is the name of the homepage view or URL pattern
     except Exception as e:
         # Handle errors gracefully and return the error message
-        return HttpResponse(f"Error occurred: {str(e)}")
-    
+        return HttpResponse(f"Error occurred: {str(e)}")   
 def squats(request):
     # Construct the absolute path to the lateralraise.py script
     script_path = os.path.join(os.path.dirname(__file__), '../scripts/squats/squats.py')
@@ -327,9 +325,11 @@ def pullup(request):
     # Construct the absolute path to the lateralraise.py script
     script_path = os.path.join(os.path.dirname(__file__), '../scripts/pullup/pullup.py')
 
+    video_path = os.path.join(os.path.dirname(script_path), 'pullup2.mp4')  # Video path in the same folder
+
     try:
-        # Use subprocess to execute the script
-        subprocess.run(["python", script_path], check=True)
+        # Use subprocess to execute the script with the video path as an argument
+        subprocess.run(["python", script_path, video_path], check=True)
         
         # Redirect to the homepage or any other view you want
         return redirect('Home')  # 'Home' is the name of the homepage view or URL pattern
@@ -337,7 +337,7 @@ def pullup(request):
         # Handle errors gracefully and return the error message
         return HttpResponse(f"Error occurred: {str(e)}")
     
-    
+
 WATCH_MAC_ADDRESS = "31:E5:D2:5E:3B:19"  # Replace with your MAC address
 
 
@@ -463,9 +463,23 @@ def deadlift(request):
     except Exception as e:
         # Handle errors gracefully and return the error message
         return HttpResponse(f"Error occurred: {str(e)}")
+
 # from django.shortcuts import render
 # from .models import ExerciseLog
+def romaniandeadlift(request):
+    # Construct the absolute path to the script and the video file
+    script_path = os.path.join(os.path.dirname(__file__), '../scripts/romaniandeadlift/romaniandeadlift.py')
+    video_path = os.path.join(os.path.dirname(script_path), 'romaniandeadlift_5.mp4')  # Video path in the same folder
 
+    try:
+        # Use subprocess to execute the script with the video path as an argument
+        subprocess.run(["python", script_path, video_path], check=True)
+        
+        # Redirect to the homepage or any other view you want
+        return redirect('Home')  # 'Home' is the name of the homepage view or URL pattern
+    except Exception as e:
+        # Handle errors gracefully and return the error message
+        return HttpResponse(f"Error occurred: {str(e)}")
 def profile_view(request):
     # Fetch exercise logs for the logged-in user
     exercise_logs = ExerciseLog.objects.filter(user=request.user).order_by('-date')  # Most recent logs first
@@ -554,11 +568,11 @@ def todeclinebenchpress(request):
 
 def tochestflymachine(request):
     shoulder=Chestflymachine.objects.all()
-    return render(request, 'chestflymachine.html',{'tochestflymachine':tochestflymachine})
+    return render(request, 'chestflymachine1.html',{'tochestflymachine':tochestflymachine})
 
-def toromaniandeadlift2(request):
-    shoulder=Romaniandeadlift2.objects.all()
-    return render(request, 'romaniandeadlift.html',{'toromaniandeadlift2':toromaniandeadlift2})
+def toromaniandeadlift(request):
+    shoulder=Romaniandeadlift.objects.all()
+    return render(request, 'romaniandeadlift1.html',{'toromaniandeadlift':toromaniandeadlift})
 def toplank(request):
     shoulder=Plank.objects.all()
     return render(request, 'plank.html',{'toplank':toplank})

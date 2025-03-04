@@ -19,8 +19,8 @@ def speak(text):
 
 # Define the path to the 'scripts/hammercurl' directory
 base_dir = os.path.dirname(os.path.abspath(__file__))  # Current script directory
-model_path = os.path.join(base_dir, 'benchpress_model.pkl')
-label_encoder_path = os.path.join(base_dir, 'benchpress_feedback.pkl')
+model_path = os.path.join(base_dir, 'mlp_model_benchpress.pkl')
+label_encoder_path = os.path.join(base_dir, 'label_encoder_benchpress.pkl')
 
 # Load the trained model and label encoder
 if os.path.exists(model_path) and os.path.exists(label_encoder_path):
