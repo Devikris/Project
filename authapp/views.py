@@ -217,7 +217,20 @@ def hipthrust(request):
         # Handle errors gracefully and return the error message
         return HttpResponse(f"Error occurred: {str(e)}")
     
+def tbarrow(request):
+    # Construct the absolute path to the lateralraise.py script
+    script_path = os.path.join(os.path.dirname(__file__), '../scripts/tbarrow/tbarrow.py')
 
+    try:
+        # Use subprocess to execute the script
+        subprocess.run(["python", script_path], check=True)
+        
+        # Redirect to the homepage or any other view you want
+        return redirect('Home')  # 'Home' is the name of the homepage view or URL pattern
+    except Exception as e:
+        # Handle errors gracefully and return the error message
+        return HttpResponse(f"Error occurred: {str(e)}")
+    
 def benchpress(request):
     # Construct the absolute path to the biceps.py script
     script_path = os.path.join(os.path.dirname(__file__), '../scripts/benchpress/benchpress.py')
@@ -320,7 +333,35 @@ def shoulderpress(request):
     except Exception as e:
         # Handle errors gracefully and return the error message
         return HttpResponse(f"Error occurred: {str(e)}")
-
+    
+def declinebenchpress(request):
+    # Construct the absolute path to the lateralraise.py script
+    script_path = os.path.join(os.path.dirname(__file__), '../scripts/declinebenchpress/declinebenchpress.py')
+    video_path = os.path.join(os.path.dirname(script_path), 'decline3.mp4')
+    try:
+        # Use subprocess to execute the script
+        subprocess.run(["python", script_path, video_path], check=True)
+        
+        # Redirect to the homepage or any other view you want
+        return redirect('Home')  # 'Home' is the name of the homepage view or URL pattern
+    except Exception as e:
+        # Handle errors gracefully and return the error message
+        return HttpResponse(f"Error occurred: {str(e)}")
+    
+def inclinebenchpress(request):
+    # Construct the absolute path to the lateralraise.py script
+    script_path = os.path.join(os.path.dirname(__file__), '../scripts/inclinebenchpress/inclinebenchpress.py')
+    video_path = os.path.join(os.path.dirname(script_path), 'decline3.mp4')
+    try:
+        # Use subprocess to execute the script
+        subprocess.run(["python", script_path, video_path], check=True)
+        
+        # Redirect to the homepage or any other view you want
+        return redirect('Home')  # 'Home' is the name of the homepage view or URL pattern
+    except Exception as e:
+        # Handle errors gracefully and return the error message
+        return HttpResponse(f"Error occurred: {str(e)}")
+    
 def pullup(request):
     # Construct the absolute path to the lateralraise.py script
     script_path = os.path.join(os.path.dirname(__file__), '../scripts/pullup/pullup.py')
@@ -560,11 +601,11 @@ def topulluppage(request):
 
 def toinclinebenchpress(request):
     shoulder=Inclinebenchpress.objects.all()
-    return render(request, 'inclinebenchpress.html',{'toinclinebenchpress':toinclinebenchpress})
+    return render(request, 'inclinebenchpress1.html',{'toinclinebenchpress':toinclinebenchpress})
 
 def todeclinebenchpress(request):
     shoulder=Declinebenchpress.objects.all()
-    return render(request, 'declinebenchpress.html',{'todeclinebenchpress':todeclinebenchpress})
+    return render(request, 'declinebenchpress1.html',{'todeclinebenchpress':todeclinebenchpress})
 
 def tochestflymachine(request):
     shoulder=Chestflymachine.objects.all()
