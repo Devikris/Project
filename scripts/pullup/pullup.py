@@ -30,7 +30,7 @@ if os.path.exists(model_path) and os.path.exists(label_encoder_path):
     model = joblib.load(model_path)
     label_encoder = joblib.load(label_encoder_path)
 else:
-    raise FileNotFoundError("One or both .pkl files are missing for Triceps Dips.")
+    raise FileNotFoundError("One or both .pkl files are missing for Pull-ups.")
 # Video Source Selection
 if len(sys.argv) > 1:
     video_path = sys.argv[1]
@@ -87,10 +87,10 @@ for i in range(cool_off_seconds, 0, -1):
     frame = np.zeros((1080, 1920, 3), dtype=np.uint8)
     cv2.putText(frame, f"Starting in {i}s...", (700, 540), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 4)
     cv2.imshow('Mediapipe Feed', frame)
-    if i==5:
-           speak(f"Starting in {i}")
+    if i == 5:
+        speak(f"Starting in {i}")
     else:
-           speak(f"{i}")
+        speak(f"{i}")
     if cv2.waitKey(1000) & 0xFF == ord('q'):
         cap.release()
         cv2.destroyAllWindows()
@@ -153,10 +153,6 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
 
 # Debugging - Track changes after execution
                     
-
-
-
-
                     input_features = np.array([elbow_angle]).reshape(1, -1)
                     predicted_feedback_encoded = model.predict(input_features)[0]
                     predicted_feedback = label_encoder.inverse_transform([predicted_feedback_encoded])[0]
@@ -167,11 +163,11 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                     else:
                         feedback_counts[predicted_feedback] = 1
 
-                    if "Great form! You're reaching the top range!" in predicted_feedback:
+                    if "Great" in predicted_feedback:
                         correct_count += 1
-                    elif "Perfect pull-up form!" in predicted_feedback:
+                    elif "Perfect" in predicted_feedback:
                         correct_count += 1
-                    elif "" in predicted_feedback: 
+                    elif "Okay" in predicted_feedback: 
                         correct_count += 1
                         
                     else:
@@ -244,7 +240,10 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
             cv2.imshow('Mediapipe Feed', frame)
             speak(f"While performing the session in future, consider to {most_frequent_feedback}")
+            cv2.putText(frame, "Press Q to see Performance Graph.", (500, 700), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
             speak("Press Q to move to see the  Performance graph")
+            cv2.imshow('Mediapipe Feed', frame)
+            
 
             while True:
                 key = cv2.waitKey(10) & 0xFF
@@ -255,14 +254,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                     cv2.destroyAllWindows()
                     exit()
 
-            # cv2.putText(frame, f"Feedback: {random_feedback}", (500, 600), 
-            #             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
-            # cv2.imshow('Mediapipe Feed', frame)
-            # speak(f"While performing the session in future, consider to {random_feedback}")
-            # cv2.putText(frame, f"Feedback: {most_frequent_feedback}", (500, 600), 
-            # cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
-            # cv2.imshow('Mediapipe Feed', frame)
-            # speak(f"While performing the session in future, consider to {most_frequent_feedback}")
+            
             
         elif key == ord('p'):
             paused = not paused  # Toggle pause state
@@ -290,6 +282,3 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
 
     cap.release()
     cv2.destroyAllWindows()
-
-
-

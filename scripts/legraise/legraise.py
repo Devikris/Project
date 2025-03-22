@@ -3,142 +3,282 @@ import joblib
 import cv2
 import mediapipe as mp
 import numpy as np
+import time
+import pyttsx3
+import matplotlib.pyplot as plt
+import sys  # Import sys to get command-line arguments
 
-# Define the path to the 'scripts/legraise' directory
-base_dir = os.path.dirname(os.path.abspath(__file__))  # Current script directory
+# Check if a video path is provided
+
+# Text-to-speech engine setup
+global counter, stage
+engine = pyttsx3.init()
+engine.setProperty('rate', 150)
+engine.setProperty('volume', 1.0)
+
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+# Define paths to the model and label encoder
+base_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(base_dir, 'mlp_model_legraise.pkl')
 label_encoder_path = os.path.join(base_dir, 'label_encoder_legraise.pkl')
 
-# Load the trained model and label encoder
+# Load trained model and label encoder
 if os.path.exists(model_path) and os.path.exists(label_encoder_path):
     model = joblib.load(model_path)
     label_encoder = joblib.load(label_encoder_path)
 else:
-    raise FileNotFoundError("One or both .pkl files are missing in the 'scripts/legraise' directory.")
+    raise FileNotFoundError("One or both .pkl files are missing for Leg Raises.")
+# Video Source Selection
+if len(sys.argv) > 1:
+    video_path = sys.argv[1]
+    cap = cv2.VideoCapture(video_path)  # Load video
+else:
+    cap = cv2.VideoCapture(0)  # Default to webcam
 
-# Get screen resolution (optional)
+if not cap.isOpened():
+    print("Error: Unable to open video file or webcam.")
+    sys.exit() # Default to webcam if no video provided
+
 screen_width = 1920  # Example for 1920px width
 screen_height = 1080  # Example for 1080px height
 
-# Define the angle calculation function
+def plot_graph(correct, incorrect):
+    labels = ['Correct', 'Incorrect']
+    counts = [correct, incorrect]
+    colors = ['#4CAF50', '#FF5733']  # Green for correct, red for incorrect
+
+    plt.figure(figsize=(6, 4))
+    plt.bar(labels, counts, color=colors)
+    plt.title('Performance Metrics')
+    plt.xlabel('Feedback')
+    plt.ylabel('Count')
+    plt.show()
+
+# Initialize performance metrics
+correct_count = 0
+incorrect_count = 0
+elapsed_time = 0
+paused = False
+pause_start_time = 0
+
 def calculate_angle(a, b, c):
-    a = np.array(a)  # First point
-    b = np.array(b)  # Midpoint
-    c = np.array(c)  # End point
-
-    # Calculate vectors
-    ba = a - b
-    bc = c - b
-
-    # Calculate cosine similarity and angle
+    a, b, c = np.array(a), np.array(b), np.array(c)
+    ba, bc = a - b, c - b
     cos_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
-    cos_angle = np.clip(cos_angle, -1.0, 1.0)  # Handle numerical issues
-    angle = np.arccos(cos_angle) * (180.0 / np.pi)  # Convert radians to degrees
-
+    angle = np.arccos(np.clip(cos_angle, -1.0, 1.0)) * (180.0 / np.pi)
     return angle
 
-# Initialize MediaPipe Pose and Drawing modules
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
+elapsed_time=0
 
-# Initialize the video capture
-cap = cv2.VideoCapture(0)
+# cap = cv2.VideoCapture(0)
+counter, stage = 0, None
 
-# Counter and stage variables for leg raise
-counter = 0
-stage = None
+last_motivation_time = 0
+cool_off_seconds = 5
 
-# Set up MediaPipe Pose instance
+cv2.namedWindow('Mediapipe Feed', cv2.WND_PROP_FULLSCREEN)
+cv2.setWindowProperty('Mediapipe Feed', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+for i in range(cool_off_seconds, 0, -1):
+    frame = np.zeros((1080, 1920, 3), dtype=np.uint8)
+    cv2.putText(frame, f"Starting in {i}s...", (700, 540), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 4)
+    cv2.imshow('Mediapipe Feed', frame)
+    if i == 5:
+        speak(f"Starting in {i}")
+    else:
+        speak(f"{i}")
+    if cv2.waitKey(1000) & 0xFF == ord('q'):
+        cap.release()
+        cv2.destroyAllWindows()
+        exit()
+speak("Start!")
+timer_start = time.time()
+
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
-    # Create a named window and resize it to screen resolution
-    cv2.namedWindow('Mediapipe Feed', cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('Mediapipe Feed', screen_width, screen_height)
-    
+    feedback_counts = {}
     while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
+        if not paused:
+            ret, frame = cap.read()
+            if not ret:
+                break
 
-        # Flip the frame horizontally for a mirror effect
-        frame = cv2.flip(frame, 1)
+            # frame = cv2.flip(frame, 1)
+            image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            image.flags.writeable = False
+            results = pose.process(image)
+            image.flags.writeable = True
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-        # Convert the image to RGB
-        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image.flags.writeable = False
+            try:
+                if results.pose_landmarks:
+                    landmarks = results.pose_landmarks.landmark
 
-        # Process the image with MediaPipe Pose
-        results = pose.process(image)
+                    def get_coords(landmark):
+                        return [landmark.x * frame.shape[1], landmark.y * frame.shape[0]]
 
-        # Convert back to BGR for rendering
-        image.flags.writeable = True
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+# Extract necessary landmarks
+                    # Initialize variables if not already set
+                    # Initialize variables globally if not already set
+                    # Ensure counter and stage are globally defined
+                    
 
-        try:
-            # Extract landmarks
-            landmarks = results.pose_landmarks.landmark
+# Initialize if not already set
+                  
 
-            # Normalize landmarks for angle calculation
-            def get_coords(landmark):
-                return [landmark.x, landmark.y]
+# Extract key points
+                    left_hip = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_HIP.value])
+                    left_knee = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value])
+                    left_ankle = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value])
 
-            # Points for leg raise posture
-            left_hip = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_HIP.value])
-            left_knee = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value])
-            left_ankle = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value])
+# Calculate hip angle
+                    hip_angle = calculate_angle(left_hip, left_knee, left_ankle)
 
-            # Calculate the leg angle
-            leg_angle = calculate_angle(left_hip, left_knee, left_ankle)
+# Debugging: Print tracking details
+                    print(f"Before Checking: Hip Angle: {hip_angle}, Stage: {stage}, Count: {counter}")
 
-            # Display the angle
-            cv2.putText(image, f"Leg Angle: {int(leg_angle)}", 
-                        tuple(np.multiply(left_knee, [640, 480]).astype(int)), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+# Ensure initial stage assignment
+                    
+# **Fix the Transition Logic**
+                    if hip_angle < 30:  # Leg down
+                        stage="down"
+                    if hip_angle > 70 and stage=="down":
+                        stage="up"
+                        counter+=1
+                        speak(f"{counter}")
+                    print(f"Repetition Count Updated: {counter}")
 
-            # Leg raise counting logic based on leg angle
-            if leg_angle < 45:
-                stage = "down"
-            if leg_angle > 90 and stage == "down":
-                stage = "up"
-                counter += 1
-                print(f"Reps: {counter}")
+# Debugging - Track changes after execution
+                    
+                    input_features = np.array([hip_angle]).reshape(1, -1)
+                    predicted_feedback_encoded = model.predict(input_features)[0]
+                    predicted_feedback = label_encoder.inverse_transform([predicted_feedback_encoded])[0]
+                    print(f"Feedback: {predicted_feedback}")
 
-            # Prepare feature vector for model prediction
-            input_features = np.array([leg_angle]).reshape(1, -1)
-            predicted_feedback_encoded = model.predict(input_features)[0]
-            predicted_feedback = label_encoder.inverse_transform([predicted_feedback_encoded])[0]
+                    if predicted_feedback in feedback_counts:
+                        feedback_counts[predicted_feedback] += 1
+                    else:
+                        feedback_counts[predicted_feedback] = 1
 
-          
-            cv2.putText(image, f"Feedback: {predicted_feedback}", 
-                        (30, 100), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2, cv2.LINE_AA)
+                    if "Great" in predicted_feedback:
+                        correct_count += 1
+                    elif "Perfect" in predicted_feedback:
+                        correct_count += 1
+                    elif "Okay" in predicted_feedback: 
+                        correct_count += 1
+                        
+                    else:
+                        incorrect_count += 1
 
+                    elapsed_time = int(time.time() - timer_start)
+                    if elapsed_time // 30 > last_motivation_time // 30:
+                        last_motivation_time = elapsed_time
+                        minutes, seconds = divmod(elapsed_time, 60)
+                        speak(f"{minutes} minute {seconds} seconds completed!")
 
-        except Exception as e:
-            print("Error:", e)
+                    feedback_x, feedback_y = frame.shape[1] // 2 - 300, frame.shape[0] - 50
+                    cv2.putText(image, predicted_feedback, (feedback_x, feedback_y),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2, cv2.LINE_AA)
+        
+            
+# Left Rectangle (Repetitions Counter)
+                    cv2.rectangle(image, (0, 0), (200, 73), (50, 50, 50), -1)  # Dark gray rectangle on left
+                    cv2.putText(image, 'REPETITIONS', (15, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)  # Moved slightly up
+                    cv2.putText(image, str(counter), (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)  # Increased gap
 
-        # Render counter and stage
-        cv2.rectangle(image, (0, 0), (225, 73), (245, 117, 16), -1)
+# Right Rectangle (Timer)
+                    right_x_start = image.shape[1] - 200
+                    cv2.rectangle(image, (right_x_start, 0), (image.shape[1], 73), (50, 50, 50), -1)  # Dark gray rectangle on right
 
-        # Display rep count and stage
-        cv2.putText(image, 'REPS', (15, 12), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-        cv2.putText(image, str(counter), 
-                    (10, 60), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
-        cv2.putText(image, 'STAGE', (65, 12), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-        cv2.putText(image, stage if stage else "None", 
-                    (65, 60), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
+# Timer Heading
+                    cv2.putText(image, 'TIMER', (right_x_start + 50, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)  # Centered text
 
-        # Render detections
-        mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+# Timer Value
+                    minutes, seconds = divmod(elapsed_time, 60)
+                    timer_text = f"{minutes:02}:{seconds:02}"
+                    cv2.putText(image, timer_text, (right_x_start + 50, 55), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)  # Increased size & gap
 
-        # Show the frame
-        cv2.imshow('Mediapipe Feed', image)
+                    cv2.imshow('Mediapipe Feed', image)
+            except Exception as e:
+                print("Error:", e)
 
-        if cv2.waitKey(10) & 0xFF == ord('q'):
-            break
+            # cv2.rectangle(image, (0, 0), (225, 73), (245, 117, 16), -1)
+            # cv2.putText(image, 'REPETITIONS', (15, 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+            # cv2.putText(image, str(counter), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2)
+            # minutes, seconds = divmod(elapsed_time, 60)
+            # timer_text = f"{minutes:02}:{seconds:02}"
+            # cv2.putText(image, timer_text, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (50, 50, 50), 2)
+
+            # cv2.imshow('Mediapipe Feed', image)
+
+        key = cv2.waitKey(10) & 0xFF
+        if key == ord('q'):
+            most_frequent_feedback = max(feedback_counts, key=feedback_counts.get)
+            speak("Session Over Here are your performance report.")
+
+            frame = np.zeros((1080, 1920, 3), dtype=np.uint8)
+            cv2.putText(frame, "Performance Report", (600, 200), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 4)
+            cv2.imshow('Mediapipe Feed', frame)
+            speak("Performance Report")
+            cv2.waitKey(1000)
+
+            cv2.putText(frame, f"Total Time: {minutes} min {seconds} sec", (500, 400), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
+            cv2.imshow('Mediapipe Feed', frame)
+            speak(f"Total time taken is {minutes} minutes and {seconds} seconds")
+            cv2.waitKey(1000)
+
+            cv2.putText(frame, f"Repetitions: {counter}", (500, 500), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
+            cv2.imshow('Mediapipe Feed', frame)
+            speak(f"The total repetitions are {counter} times")
+            cv2.imshow('Mediapipe Feed', frame)
+            cv2.putText(frame, f"Feedback: {most_frequent_feedback}", (500, 600), 
+            cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
+            cv2.imshow('Mediapipe Feed', frame)
+            speak(f"While performing the session in future, consider to {most_frequent_feedback}")
+            cv2.putText(frame, "Press Q to see Performance Graph.", (500, 700), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
+            speak("Press Q to move to see the  Performance graph")
+            cv2.imshow('Mediapipe Feed', frame)
+            
+
+            while True:
+                key = cv2.waitKey(10) & 0xFF
+                if key == ord('q'):
+                    plot_graph(correct_count, incorrect_count)
+                    speak("Press Q to exit.")
+                    cap.release()
+                    cv2.destroyAllWindows()
+                    exit()
+
+            
+            
+        elif key == ord('p'):
+            paused = not paused  # Toggle pause state
+            if paused:
+                pause_start_time = time.time()
+                speak("Session paused. Press P to resume.")
+            else:
+                speak(f"Session resumed! You are at {minutes} minutes {seconds} seconds.")
+                timer_start += time.time() - pause_start_time  # Adjust timer to maintain elapsed time
+                
+
+# Add a pause loop inside the while loop
+        while paused:
+            key = cv2.waitKey(10) & 0xFF
+            if key == ord('p'):
+               speak(f"Session resumed! You are at {minutes} minutes {seconds} seconds.")
+               paused = False
+               timer_start += time.time() - pause_start_time
+               
+               break
+            elif key == ord('q'):
+                cap.release()
+                cv2.destroyAllWindows()
+                exit()
 
     cap.release()
     cv2.destroyAllWindows()

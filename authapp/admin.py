@@ -10,7 +10,9 @@ from authapp.models import (
     Legs,
     Chests,
     Body,
-    Shoulder, # Add this if `HeartRate` is part of authapp
+    Shoulder,
+    BMICalculator,
+     # Add this if `HeartRate` is part of authapp
 )
 
 # Register your models here.
@@ -25,5 +27,5 @@ admin.site.register(Legs)
 admin.site.register(Chests)
 admin.site.register(Body)
 admin.site.register(Shoulder)
-
+admin.site.register(BMICalculator)
 # Register HeartRate if it belongs to authapp

@@ -1,309 +1,3 @@
-#tricep dips with opencv
-# import os
-# import joblib
-# import cv2
-# import mediapipe as mp
-# import numpy as np
-
-# # Define the path to the 'scripts/tricep_dips' directory
-# base_dir = os.path.dirname(os.path.abspath(__file__))  # Current script directory
-# model_path = os.path.join(base_dir, 'mlp_model_tricepdips.pkl')
-# label_encoder_path = os.path.join(base_dir, 'label_encoder_tricepdips.pkl')
-
-# # Load the trained model and label encoder
-# if os.path.exists(model_path) and os.path.exists(label_encoder_path):
-#     model = joblib.load(model_path)
-#     label_encoder = joblib.load(label_encoder_path)
-# else:
-#     raise FileNotFoundError("One or both .pkl files are missing in the 'scripts/tricep_dips' directory.")
-
-# # Get screen resolution (optional)
-# screen_width = 1920  # Example for 1920px width
-# screen_height = 1080  # Example for 1080px height
-
-# # Define the angle calculation function
-# def calculate_angle(a, b, c):
-#     a = np.array(a)  # First point
-#     b = np.array(b)  # Midpoint
-#     c = np.array(c)  # End point
-
-#     # Calculate vectors
-#     ba = a - b
-#     bc = c - b
-
-#     # Calculate cosine similarity and angle
-#     cos_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
-#     cos_angle = np.clip(cos_angle, -1.0, 1.0)  # Handle numerical issues
-#     angle = np.arccos(cos_angle) * (180.0 / np.pi)  # Convert radians to degrees
-
-#     return angle
-
-# # Initialize MediaPipe Pose and Drawing modules
-# mp_pose = mp.solutions.pose
-# mp_drawing = mp.solutions.drawing_utils
-
-# # Initialize the video capture
-# cap = cv2.VideoCapture(0)
-
-# # Counter and stage variables for tricep dips
-# counter = 0
-# stage = None
-# paused = False  # Pause functionality flag
-
-# # Set up MediaPipe Pose instance
-# with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
-#     # Create a named window and resize it to screen resolution
-#     cv2.namedWindow('Mediapipe Feed', cv2.WINDOW_NORMAL)
-#     cv2.resizeWindow('Mediapipe Feed', screen_width, screen_height)
-
-#     while cap.isOpened():
-#         if not paused:
-#             ret, frame = cap.read()
-#             if not ret:
-#                 break
-
-#             # Flip the frame horizontally for a mirror effect
-#             frame = cv2.flip(frame, 1)
-
-#             # Convert the image to RGB
-#             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-#             image.flags.writeable = False
-
-#             # Process the image with MediaPipe Pose
-#             results = pose.process(image)
-
-#             # Convert back to BGR for rendering
-#             image.flags.writeable = True
-#             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
-#             try:
-#                 # Extract landmarks
-#                 landmarks = results.pose_landmarks.landmark
-
-#                 # Normalize landmarks for angle calculation
-#                 def get_coords(landmark):
-#                     return [landmark.x, landmark.y]
-
-#                 # Points for tricep dips
-#                 left_elbow = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value])
-#                 left_shoulder = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value])
-#                 left_wrist = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value])
-
-#                 # Calculate the elbow angle
-#                 elbow_angle = calculate_angle(left_shoulder, left_elbow, left_wrist)
-
-#                 # Display the angle
-#                 cv2.putText(image, f"Elbow Angle: {int(elbow_angle)}",
-#                             tuple(np.multiply(left_elbow, [640, 480]).astype(int)),
-#                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
-
-#                 # Tricep dip counting logic based on elbow angle
-#                 if elbow_angle > 160:
-#                     stage = "up"
-#                 if elbow_angle < 90 and stage == "up":
-#                     stage = "down"
-#                     counter += 1
-#                     print(f"Reps: {counter}")
-
-#                 # Prepare feature vector for model prediction
-#                 input_features = np.array([elbow_angle]).reshape(1, -1)
-#                 predicted_feedback_encoded = model.predict(input_features)[0]
-#                 predicted_feedback = label_encoder.inverse_transform([predicted_feedback_encoded])[0]
-
-#                 # Display the feedback
-#                 cv2.putText(image, f"Feedback: {predicted_feedback}",
-#                             (30, 100),
-#                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)
-
-#             except Exception as e:
-#                 print("Error:", e)
-
-#             # Render counter and stage
-#             cv2.rectangle(image, (0, 0), (225, 73), (245, 117, 16), -1)
-
-#             # Display rep count and stage
-#             cv2.putText(image, 'REPS', (15, 12),
-#                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-#             cv2.putText(image, str(counter),
-#                         (10, 60),
-#                         cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
-#             cv2.putText(image, 'STAGE', (65, 12),
-#                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-#             cv2.putText(image, stage if stage else "None",
-#                         (65, 60),
-#                         cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
-
-#             # Render detections
-#             mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-
-#         # Show the frame
-#         cv2.imshow('Mediapipe Feed', image)
-
-#         # Handle keyboard input for quitting or pausing
-#         key = cv2.waitKey(10) & 0xFF
-#         if key == ord('q'):
-#             break
-#         elif key == ord('p'):
-#             paused = not paused
-
-#     cap.release()
-#     cv2.destroyAllWindows()
-
-
-
-
-# import os
-# import joblib
-# import cv2
-# import mediapipe as mp
-# import numpy as np
-# import sys
-
-# # Check if video path is passed as an argument
-# if len(sys.argv) < 2:
-#     raise ValueError("Please provide the path to the video file as an argument.")
-
-# video_path = sys.argv[1]
-# print(f"Video path: {video_path}")
-
-# # Define the path to the model and label encoder
-# base_dir = os.path.dirname(os.path.abspath(__file__))
-# model_path = os.path.join(base_dir, 'mlp_model_tricepdips.pkl')
-# label_encoder_path = os.path.join(base_dir, 'label_encoder_tricepdips.pkl')
-
-# # Load the trained model and label encoder
-# if os.path.exists(model_path) and os.path.exists(label_encoder_path):
-#     model = joblib.load(model_path)
-#     label_encoder = joblib.load(label_encoder_path)
-# else:
-#     raise FileNotFoundError("One or both .pkl files are missing.")
-
-# # Define the angle calculation function
-# def calculate_angle(a, b, c):
-#     a = np.array(a)
-#     b = np.array(b)
-#     c = np.array(c)
-
-#     # Calculate vectors
-#     ba = a - b
-#     bc = c - b
-
-#     # Calculate cosine similarity and angle
-#     cos_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
-#     cos_angle = np.clip(cos_angle, -1.0, 1.0)
-#     angle = np.arccos(cos_angle) * (180.0 / np.pi)  # Convert radians to degrees
-#     return angle
-
-# # Initialize MediaPipe Pose and Drawing modules
-# mp_pose = mp.solutions.pose
-# mp_drawing = mp.solutions.drawing_utils
-
-# # Open the video file
-# cap = cv2.VideoCapture(video_path)
-# if not cap.isOpened():
-#     raise FileNotFoundError(f"Unable to open video file: {video_path}")
-
-# # Counter and stage variables
-# counter = 0
-# stage = None
-# paused = False
-
-# # Set up MediaPipe Pose instance
-# with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
-#     while cap.isOpened():
-#         if not paused:
-#             ret, frame = cap.read()
-#             if not ret:
-#                 break
-
-#             # Flip the frame horizontally
-#             frame = cv2.flip(frame, 1)
-
-#             # Convert the image to RGB
-#             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-#             image.flags.writeable = False
-
-#             # Process the image with MediaPipe Pose
-#             results = pose.process(image)
-
-#             # Convert back to BGR
-#             image.flags.writeable = True
-#             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
-#             try:
-#                 # Ensure landmarks are detected
-#                 if not results.pose_landmarks:
-#                     raise ValueError("Landmarks not detected.")
-
-#                 # Extract landmarks
-#                 landmarks = results.pose_landmarks.landmark
-
-#                 # Normalize landmarks for angle calculation
-#                 def get_coords(landmark):
-#                     return [landmark.x * frame.shape[1], landmark.y * frame.shape[0]]
-
-#                 # Points for tricep dips posture
-#                 shoulder = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value])
-#                 elbow = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value])
-#                 wrist = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value])
-
-#                 # Calculate the elbow angle
-#                 elbow_angle = calculate_angle(shoulder, elbow, wrist)
-#                 print(f"Elbow Angle: {elbow_angle}")  # Debugging
-
-#                 # Display the angle
-#                 cv2.putText(image, f"Elbow Angle: {int(elbow_angle)}",
-#                             (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
-
-#                 # Tricep dips counting logic
-#                 if elbow_angle > 160 and stage != "up":  # "up" position
-#                     stage = "up"
-#                     print(f"Stage set to 'up'. Angle: {elbow_angle}")  # Debugging
-
-#                 if elbow_angle < 90 and stage == "up":  # "down" position
-#                     counter += 1  # Increment counter when dip is complete
-#                     stage = "down"
-#                     print(f"Repetition counted: {counter}. Stage set to 'down'. Angle: {elbow_angle}")  # Debugging
-
-#                 # Prepare feature vector for model prediction
-#                 input_features = np.array([elbow_angle]).reshape(1, -1)
-#                 predicted_feedback_encoded = model.predict(input_features)[0]
-#                 predicted_feedback = label_encoder.inverse_transform([predicted_feedback_encoded])[0]
-
-#                 # Display the feedback
-#                 cv2.putText(image, f"Feedback: {predicted_feedback}",
-#                             (30, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (245, 117, 16), 2, cv2.LINE_AA)
-
-#             except Exception as e:
-#                 print("Error:", e)
-
-#             # Render counter and stage
-#             cv2.rectangle(image, (0, 0), (225, 73), (245, 117, 16), -1)
-
-#             # Display rep count and stage
-#             cv2.putText(image, 'REPS', (15, 12),
-#                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-#             cv2.putText(image, str(counter),
-#                         (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
-#             cv2.putText(image, 'STAGE', (65, 12),
-#                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-#             cv2.putText(image, stage if stage else "None",
-#                         (65, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
-
-#             # Render detections
-#             mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-
-#         # Show the frame
-#         cv2.imshow('Mediapipe Feed', image)
-
-#         key = cv2.waitKey(10) & 0xFF
-#         if key == ord('q'):
-#             break
-#         elif key == ord('p'):
-#             paused = not paused  # Toggle pause
-
-#     cap.release()
-#     cv2.destroyAllWindows()
 import os
 import joblib
 import cv2
@@ -312,8 +6,12 @@ import numpy as np
 import time
 import pyttsx3
 import matplotlib.pyplot as plt
+import sys  # Import sys to get command-line arguments
+
+# Check if a video path is provided
 
 # Text-to-speech engine setup
+global counter, stage
 engine = pyttsx3.init()
 engine.setProperty('rate', 150)
 engine.setProperty('volume', 1.0)
@@ -332,7 +30,18 @@ if os.path.exists(model_path) and os.path.exists(label_encoder_path):
     model = joblib.load(model_path)
     label_encoder = joblib.load(label_encoder_path)
 else:
-    raise FileNotFoundError("One or both .pkl files are missing for Triceps Dips.")
+    raise FileNotFoundError("One or both .pkl files are missing for Tricep Dips.")
+# Video Source Selection
+if len(sys.argv) > 1:
+    video_path = sys.argv[1]
+    cap = cv2.VideoCapture(video_path)  # Load video
+else:
+    cap = cv2.VideoCapture(0)  # Default to webcam
+
+if not cap.isOpened():
+    print("Error: Unable to open video file or webcam.")
+    sys.exit() # Default to webcam if no video provided
+
 screen_width = 1920  # Example for 1920px width
 screen_height = 1080  # Example for 1080px height
 
@@ -366,7 +75,7 @@ mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
 elapsed_time=0
 
-cap = cv2.VideoCapture(0)
+# cap = cv2.VideoCapture(0)
 counter, stage = 0, None
 
 last_motivation_time = 0
@@ -376,9 +85,12 @@ cv2.namedWindow('Mediapipe Feed', cv2.WND_PROP_FULLSCREEN)
 cv2.setWindowProperty('Mediapipe Feed', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 for i in range(cool_off_seconds, 0, -1):
     frame = np.zeros((1080, 1920, 3), dtype=np.uint8)
-    cv2.putText(frame, f"Starting in {i}s...", (700, 540), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 4, cv2.LINE_AA)
+    cv2.putText(frame, f"Starting in {i}s...", (700, 540), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 4)
     cv2.imshow('Mediapipe Feed', frame)
-    speak(f"{i}")
+    if i == 5:
+        speak(f"Starting in {i}")
+    else:
+        speak(f"{i}")
     if cv2.waitKey(1000) & 0xFF == ord('q'):
         cap.release()
         cv2.destroyAllWindows()
@@ -394,7 +106,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             if not ret:
                 break
 
-            frame = cv2.flip(frame, 1)
+            # frame = cv2.flip(frame, 1)
             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image.flags.writeable = False
             results = pose.process(image)
@@ -408,24 +120,39 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                     def get_coords(landmark):
                         return [landmark.x * frame.shape[1], landmark.y * frame.shape[0]]
 
+# Extract necessary landmarks
+                    # Initialize variables if not already set
+                    # Initialize variables globally if not already set
+                    # Ensure counter and stage are globally defined
+                    
+
+# Initialize if not already set
+                  
+
+# Extract key points
                     left_shoulder = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value])
                     left_elbow = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value])
                     left_wrist = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value])
 
+# Calculate elbow angle
                     elbow_angle = calculate_angle(left_shoulder, left_elbow, left_wrist)
 
-                    cv2.putText(image, f"Elbow Angle: {int(elbow_angle)}",
-                                tuple(np.multiply(left_elbow, [640, 480]).astype(int)),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+# Debugging: Print tracking details
+                    print(f"Before Checking: Elbow Angle: {elbow_angle}, Stage: {stage}, Count: {counter}")
 
-                    if elbow_angle > 160:
-                        stage = "up"
-                    if elbow_angle < 90 and stage == "up":
-                        stage = "down"
-                        counter += 1
+# Ensure initial stage assignment
+                    
+# **Fix the Transition Logic**
+                    if elbow_angle > 150:  # Fully extended
+                        stage="down"
+                    if elbow_angle < 90 and stage=="down":
+                        stage="up"
+                        counter+=1
                         speak(f"{counter}")
-                        print(f"Reps: {counter}")
+                    print(f"Repetition Count Updated: {counter}")
 
+# Debugging - Track changes after execution
+                    
                     input_features = np.array([elbow_angle]).reshape(1, -1)
                     predicted_feedback_encoded = model.predict(input_features)[0]
                     predicted_feedback = label_encoder.inverse_transform([predicted_feedback_encoded])[0]
@@ -437,7 +164,12 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                         feedback_counts[predicted_feedback] = 1
 
                     if "Great" in predicted_feedback:
-                       correct_count += 1
+                        correct_count += 1
+                    elif "Perfect" in predicted_feedback:
+                        correct_count += 1
+                    elif "Okay" in predicted_feedback: 
+                        correct_count += 1
+                        
                     else:
                         incorrect_count += 1
 
@@ -450,17 +182,37 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                     feedback_x, feedback_y = frame.shape[1] // 2 - 300, frame.shape[0] - 50
                     cv2.putText(image, predicted_feedback, (feedback_x, feedback_y),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2, cv2.LINE_AA)
+        
+            
+# Left Rectangle (Repetitions Counter)
+                    cv2.rectangle(image, (0, 0), (200, 73), (50, 50, 50), -1)  # Dark gray rectangle on left
+                    cv2.putText(image, 'REPETITIONS', (15, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)  # Moved slightly up
+                    cv2.putText(image, str(counter), (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)  # Increased gap
+
+# Right Rectangle (Timer)
+                    right_x_start = image.shape[1] - 200
+                    cv2.rectangle(image, (right_x_start, 0), (image.shape[1], 73), (50, 50, 50), -1)  # Dark gray rectangle on right
+
+# Timer Heading
+                    cv2.putText(image, 'TIMER', (right_x_start + 50, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)  # Centered text
+
+# Timer Value
+                    minutes, seconds = divmod(elapsed_time, 60)
+                    timer_text = f"{minutes:02}:{seconds:02}"
+                    cv2.putText(image, timer_text, (right_x_start + 50, 55), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)  # Increased size & gap
+
+                    cv2.imshow('Mediapipe Feed', image)
             except Exception as e:
                 print("Error:", e)
 
-            cv2.rectangle(image, (0, 0), (225, 73), (245, 117, 16), -1)
-            cv2.putText(image, 'REPETITIONS', (15, 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
-            cv2.putText(image, str(counter), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2)
-            minutes, seconds = divmod(elapsed_time, 60)
-            timer_text = f"{minutes:02}:{seconds:02}"
-            cv2.putText(image, timer_text, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (50, 50, 50), 2)
+            # cv2.rectangle(image, (0, 0), (225, 73), (245, 117, 16), -1)
+            # cv2.putText(image, 'REPETITIONS', (15, 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+            # cv2.putText(image, str(counter), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2)
+            # minutes, seconds = divmod(elapsed_time, 60)
+            # timer_text = f"{minutes:02}:{seconds:02}"
+            # cv2.putText(image, timer_text, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (50, 50, 50), 2)
 
-            cv2.imshow('Mediapipe Feed', image)
+            # cv2.imshow('Mediapipe Feed', image)
 
         key = cv2.waitKey(10) & 0xFF
         if key == ord('q'):
@@ -483,14 +235,14 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                         cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
             cv2.imshow('Mediapipe Feed', frame)
             speak(f"The total repetitions are {counter} times")
+            cv2.imshow('Mediapipe Feed', frame)
             cv2.putText(frame, f"Feedback: {most_frequent_feedback}", (500, 600), 
             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
             cv2.imshow('Mediapipe Feed', frame)
             speak(f"While performing the session in future, consider to {most_frequent_feedback}")
-            cv2.putText(frame, "Press Q to see Performance Graph.", (600, 700), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
+            cv2.putText(frame, "Press Q to see Performance Graph.", (500, 700), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
             speak("Press Q to move to see the  Performance graph")
             cv2.imshow('Mediapipe Feed', frame)
-            
             
 
             while True:
@@ -503,16 +255,30 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                     exit()
 
             
+            
         elif key == ord('p'):
+            paused = not paused  # Toggle pause state
             if paused:
-                paused = False
-                timer_start += time.time() - pause_start_time
-                speak(f"Session resumed! You are at {minutes} minutes {seconds} seconds.")
-            else:
-                paused = True
                 pause_start_time = time.time()
                 speak("Session paused. Press P to resume.")
+            else:
+                speak(f"Session resumed! You are at {minutes} minutes {seconds} seconds.")
+                timer_start += time.time() - pause_start_time  # Adjust timer to maintain elapsed time
+                
+
+# Add a pause loop inside the while loop
+        while paused:
+            key = cv2.waitKey(10) & 0xFF
+            if key == ord('p'):
+               speak(f"Session resumed! You are at {minutes} minutes {seconds} seconds.")
+               paused = False
+               timer_start += time.time() - pause_start_time
+               
+               break
+            elif key == ord('q'):
+                cap.release()
+                cv2.destroyAllWindows()
+                exit()
 
     cap.release()
     cv2.destroyAllWindows()
-      

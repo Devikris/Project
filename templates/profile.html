@@ -92,4 +92,44 @@ Profile
     </div>
 </div>
 {% endblock body %}
-    
+     {% endcomment %}
+     {% comment %}
+      <!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Profile</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: black; color: white; text-align: center; }
+        .profile-container { max-width: 600px; margin: auto; background: #222; padding: 20px; border-radius: 10px; }
+        table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+        th, td { padding: 10px; border: 1px solid white; }
+        th { background: #444; }
+    </style>
+</head>
+<body>
+    <h2>Welcome, {{ user.username }}</h2>
+    <div class="profile-container">
+        <h3>Your Exercise History</h3>
+        {% if exercises %}
+            <table>
+                <tr>
+                    <th>Exercise</th>
+                    <th>Duration (min)</th>
+                    <th>Calories Burned</th>
+                    <th>Date</th>
+                </tr>
+                {% for exercise in exercises %}
+                <tr>
+                    <td>{{ exercise.exercise_name }}</td>
+                    <td>{{ exercise.duration }}</td>
+                    <td>{{ exercise.calories_burned }}</td>
+                    <td>{{ exercise.date|date:"Y-m-d H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>No exercise records found.</p>
+        {% endif %}
+    </div>
+</body>
+</html> {% endcomment %}

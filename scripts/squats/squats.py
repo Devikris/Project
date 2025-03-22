@@ -6,30 +6,42 @@ import numpy as np
 import time
 import pyttsx3
 import matplotlib.pyplot as plt
-# import random
+import sys  # Import sys to get command-line arguments
+
+# Check if a video path is provided
 
 # Text-to-speech engine setup
+global counter, stage
 engine = pyttsx3.init()
-engine.setProperty('rate', 150)  # Speed of speech
-engine.setProperty('volume', 1.0)  # Volume level
+engine.setProperty('rate', 150)
+engine.setProperty('volume', 1.0)
 
 def speak(text):
     engine.say(text)
     engine.runAndWait()
 
-# Define the path to the 'scripts/hammercurl' directory
-base_dir = os.path.dirname(os.path.abspath(__file__))  # Current script directory
+# Define paths to the model and label encoder
+base_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(base_dir, 'mlp_model_squats.pkl')
 label_encoder_path = os.path.join(base_dir, 'label_encoder_squats.pkl')
 
-# Load the trained model and label encoder
+# Load trained model and label encoder
 if os.path.exists(model_path) and os.path.exists(label_encoder_path):
     model = joblib.load(model_path)
     label_encoder = joblib.load(label_encoder_path)
 else:
-    raise FileNotFoundError("One or both .pkl files are missing in the 'scripts/hammercurl' directory.")
+    raise FileNotFoundError("One or both .pkl files are missing for Squats.")
+# Video Source Selection
+if len(sys.argv) > 1:
+    video_path = sys.argv[1]
+    cap = cv2.VideoCapture(video_path)  # Load video
+else:
+    cap = cv2.VideoCapture(0)  # Default to webcam
 
-# Get screen resolution (optional)
+if not cap.isOpened():
+    print("Error: Unable to open video file or webcam.")
+    sys.exit() # Default to webcam if no video provided
+
 screen_width = 1920  # Example for 1920px width
 screen_height = 1080  # Example for 1080px height
 
@@ -45,52 +57,38 @@ def plot_graph(correct, incorrect):
     plt.ylabel('Count')
     plt.show()
 
-# Main program loop
-is_active = False
+# Initialize performance metrics
 correct_count = 0
 incorrect_count = 0
-elapsed_time=0
+elapsed_time = 0
+paused = False
+pause_start_time = 0
 
-# Define the angle calculation function
 def calculate_angle(a, b, c):
-    a = np.array(a)  # First point
-    b = np.array(b)  # Midpoint
-    c = np.array(c)  # End point
-
-    # Calculate vectors
-    ba = a - b
-    bc = c - b
-
-    # Calculate cosine similarity and angle
+    a, b, c = np.array(a), np.array(b), np.array(c)
+    ba, bc = a - b, c - b
     cos_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
-    cos_angle = np.clip(cos_angle, -1.0, 1.0)  # Handle numerical issues
-    angle = np.arccos(cos_angle) * (180.0 / np.pi)  # Convert radians to degrees
-
+    angle = np.arccos(np.clip(cos_angle, -1.0, 1.0)) * (180.0 / np.pi)
     return angle
 
-# Initialize MediaPipe Pose and Drawing modules
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
+elapsed_time=0
 
-# Initialize the video capture
-cap = cv2.VideoCapture(0)
-# Counter and stage variables for hammer curl
-counter = 0
-stage = None
-timer_start = None
+# cap = cv2.VideoCapture(0)
+counter, stage = 0, None
+
 last_motivation_time = 0
 cool_off_seconds = 5
-  # Cool-off period
 
-# Cool-off countdown
 cv2.namedWindow('Mediapipe Feed', cv2.WND_PROP_FULLSCREEN)
 cv2.setWindowProperty('Mediapipe Feed', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 for i in range(cool_off_seconds, 0, -1):
-    frame = np.zeros((1080, 1920, 3), dtype=np.uint8)  # Black screen
-    cv2.putText(frame, f"Starting in {i}s...", (700, 540), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 4, cv2.LINE_AA)
+    frame = np.zeros((1080, 1920, 3), dtype=np.uint8)
+    cv2.putText(frame, f"Starting in {i}s...", (700, 540), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 4)
     cv2.imshow('Mediapipe Feed', frame)
     if i == 5:
-        speak(f"Starting in {i} ")
+        speak(f"Starting in {i}")
     else:
         speak(f"{i}")
     if cv2.waitKey(1000) & 0xFF == ord('q'):
@@ -98,134 +96,127 @@ for i in range(cool_off_seconds, 0, -1):
         cv2.destroyAllWindows()
         exit()
 speak("Start!")
+timer_start = time.time()
 
-# Counter and stage variables for hammer curl
-counter = 0
-stage = None
-timer_start = time.time()  # Start the timer when the program starts
-last_motivation_time = 0  # To track the last motivational message time
-
-
-# Set up MediaPipe Pose instance
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
-    cv2.namedWindow('Mediapipe Feed', cv2.WND_PROP_FULLSCREEN)
-    cv2.setWindowProperty('Mediapipe Feed', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-
-    elapsed_time_at_pause = 0
-    # Dictionary to track feedback counts
     feedback_counts = {}
-
     while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
+        if not paused:
+            ret, frame = cap.read()
+            if not ret:
+                break
 
-        frame = cv2.flip(frame, 1)
+            # frame = cv2.flip(frame, 1)
+            image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            image.flags.writeable = False
+            results = pose.process(image)
+            image.flags.writeable = True
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image.flags.writeable = False
+            try:
+                if results.pose_landmarks:
+                    landmarks = results.pose_landmarks.landmark
 
-        results = pose.process(image)
+                    def get_coords(landmark):
+                        return [landmark.x * frame.shape[1], landmark.y * frame.shape[0]]
 
-        image.flags.writeable = True
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+# Extract necessary landmarks
+                    # Initialize variables if not already set
+                    # Initialize variables globally if not already set
+                    # Ensure counter and stage are globally defined
+                    
 
-        try:
-            if results.pose_landmarks is not None:
-                landmarks = results.pose_landmarks.landmark
+# Initialize if not already set
+                  
 
-            def get_coords(landmark):
-                return [landmark.x * frame.shape[1], landmark.y * frame.shape[0]]
+# Extract key points
+                    left_hip = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_HIP.value])
+                    left_knee = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value])
+                    left_ankle = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value])
 
-           
-            left_knee = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value])
-            left_hip = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_HIP.value])
-            left_ankle = get_coords(landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value])
+# Calculate knee angle
+                    knee_angle = calculate_angle(left_hip, left_knee, left_ankle)
 
-            # Calculate the knee angle
-            knee_angle = calculate_angle(left_hip, left_knee, left_ankle)
+# Debugging: Print tracking details
+                    print(f"Before Checking: Knee Angle: {knee_angle}, Stage: {stage}, Count: {counter}")
 
-            # Display the angle
-            cv2.putText(image, f"Knee Angle: {int(knee_angle)}", 
-                        tuple(np.multiply(left_knee, [640, 480]).astype(int)), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+# Ensure initial stage assignment
+                    
+# **Fix the Transition Logic**
+                    if knee_angle > 160:  # Fully extended
+                        stage="up"
+                    if knee_angle < 90 and stage=="up":
+                        stage="down"
+                        counter+=1
+                        speak(f"{counter}")
+                    print(f"Repetition Count Updated: {counter}")
 
-            # Squat counting logic based on knee angle
-            if knee_angle > 160:
-                stage = "up"
-            if knee_angle < 90 and stage == "up":
-                stage = "down"
-                counter += 1
-                print(f"Reps: {counter}")
+# Debugging - Track changes after execution
+                    
+                    input_features = np.array([knee_angle]).reshape(1, -1)
+                    predicted_feedback_encoded = model.predict(input_features)[0]
+                    predicted_feedback = label_encoder.inverse_transform([predicted_feedback_encoded])[0]
+                    print(f"Feedback: {predicted_feedback}")
 
-            input_features = np.array([angle]).reshape(1, -1)
-            predicted_feedback_encoded = model.predict(input_features)[0]
-            predicted_feedback = label_encoder.inverse_transform([predicted_feedback_encoded])[0]
-            print(f"Feedback: {predicted_feedback}")
+                    if predicted_feedback in feedback_counts:
+                        feedback_counts[predicted_feedback] += 1
+                    else:
+                        feedback_counts[predicted_feedback] = 1
+
+                    if "Great" in predicted_feedback:
+                        correct_count += 1
+                    elif "Perfect squat form!" in predicted_feedback:
+                        correct_count += 1
+                    elif "Okay" in predicted_feedback: 
+                        correct_count += 1
+                        
+                    else:
+                        incorrect_count += 1
+
+                    elapsed_time = int(time.time() - timer_start)
+                    if elapsed_time // 30 > last_motivation_time // 30:
+                        last_motivation_time = elapsed_time
+                        minutes, seconds = divmod(elapsed_time, 60)
+                        speak(f"{minutes} minute {seconds} seconds completed!")
+
+                    feedback_x, feedback_y = frame.shape[1] // 2 - 300, frame.shape[0] - 50
+                    cv2.putText(image, predicted_feedback, (feedback_x, feedback_y),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2, cv2.LINE_AA)
+        
             
+# Left Rectangle (Repetitions Counter)
+                    cv2.rectangle(image, (0, 0), (200, 73), (50, 50, 50), -1)  # Dark gray rectangle on left
+                    cv2.putText(image, 'REPETITIONS', (15, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)  # Moved slightly up
+                    cv2.putText(image, str(counter), (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)  # Increased gap
 
-            # Update feedback counts
-            if predicted_feedback in feedback_counts:
-                feedback_counts[predicted_feedback] += 1
-            else:
-                feedback_counts[predicted_feedback] = 1
+# Right Rectangle (Timer)
+                    right_x_start = image.shape[1] - 200
+                    cv2.rectangle(image, (right_x_start, 0), (image.shape[1], 73), (50, 50, 50), -1)  # Dark gray rectangle on right
 
-            if "Great" in predicted_feedback:
-                correct_count += 1
-            else:
-                incorrect_count += 1
+# Timer Heading
+                    cv2.putText(image, 'TIMER', (right_x_start + 50, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)  # Centered text
 
-            elapsed_time = int(time.time() - timer_start)
+# Timer Value
+                    minutes, seconds = divmod(elapsed_time, 60)
+                    timer_text = f"{minutes:02}:{seconds:02}"
+                    cv2.putText(image, timer_text, (right_x_start + 50, 55), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)  # Increased size & gap
 
-            if elapsed_time // 30 > last_motivation_time // 30:
-                last_motivation_time = elapsed_time
-                minutes = elapsed_time // 60
-                seconds = elapsed_time % 60
-                speak(f"{minutes} minute {seconds} seconds completed!")
+                    cv2.imshow('Mediapipe Feed', image)
+            except Exception as e:
+                print("Error:", e)
 
-            feedback_x = frame.shape[1] // 2 - 300
-            feedback_y = frame.shape[0] - 50
-            cv2.putText(image, predicted_feedback, 
-                        (feedback_x, feedback_y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2, cv2.LINE_AA)
+            # cv2.rectangle(image, (0, 0), (225, 73), (245, 117, 16), -1)
+            # cv2.putText(image, 'REPETITIONS', (15, 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+            # cv2.putText(image, str(counter), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2)
+            # minutes, seconds = divmod(elapsed_time, 60)
+            # timer_text = f"{minutes:02}:{seconds:02}"
+            # cv2.putText(image, timer_text, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (50, 50, 50), 2)
 
-        except Exception as e:
-            print("Error:", e)
-
-        cv2.rectangle(image, (0, 0), (225, 73), (245, 117, 16), -1)
-
-        cv2.putText(image, 'REPETITIONS', (15, 12), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-        cv2.putText(image, str(counter), 
-                    (10, 60), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
-
-        timer_radius = 50
-        center = (frame.shape[1] - 80, 80)
-        cv2.circle(image, center, timer_radius, (0, 0, 0), -1)
-
-        angle = (elapsed_time % 60) * 6
-        cv2.ellipse(image, center, (timer_radius, timer_radius), 90, 0, angle, (255, 255, 255), -1)
-
-        minutes = elapsed_time // 60
-        seconds = elapsed_time % 60
-        timer_text = f"{minutes:02}:{seconds:02}"
-        text_size = cv2.getTextSize(timer_text, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)[0]
-        text_x = center[0] - text_size[0] // 2
-        text_y = center[1] + text_size[1] // 2
-        cv2.putText(image, timer_text, (text_x, text_y), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (50, 50, 50), 2, cv2.LINE_AA)
-
-        cv2.imshow('Mediapipe Feed', image)
+            # cv2.imshow('Mediapipe Feed', image)
 
         key = cv2.waitKey(10) & 0xFF
         if key == ord('q'):
-            total_time = int(time.time() - timer_start)
-            minutes = total_time // 60
-            seconds = total_time % 60
             most_frequent_feedback = max(feedback_counts, key=feedback_counts.get)
-
-
             speak("Session Over Here are your performance report.")
 
             frame = np.zeros((1080, 1920, 3), dtype=np.uint8)
@@ -244,18 +235,15 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                         cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
             cv2.imshow('Mediapipe Feed', frame)
             speak(f"The total repetitions are {counter} times")
-            cv2.waitKey(1000)
-
-            
+            cv2.imshow('Mediapipe Feed', frame)
             cv2.putText(frame, f"Feedback: {most_frequent_feedback}", (500, 600), 
             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
             cv2.imshow('Mediapipe Feed', frame)
             speak(f"While performing the session in future, consider to {most_frequent_feedback}")
-            cv2.waitKey(1000)
-
-            cv2.putText(frame, "Press Q to see Performance Graph.", (500, 700), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)#(length,height)
+            cv2.putText(frame, "Press Q to see Performance Graph.", (500, 700), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
             speak("Press Q to move to see the  Performance graph")
             cv2.imshow('Mediapipe Feed', frame)
+            
 
             while True:
                 key = cv2.waitKey(10) & 0xFF
@@ -266,14 +254,31 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                     cv2.destroyAllWindows()
                     exit()
 
+            
+            
         elif key == ord('p'):
-            speak("Hold on! Session paused. Press P to get back on track.")
-            elapsed_time_at_pause = int(time.time() - timer_start)
-            while cv2.waitKey(10) & 0xFF != ord('p'):
-                pass
-            minutes = elapsed_time_at_pause // 60
-            seconds = elapsed_time_at_pause % 60
-            speak(f"Session Resumed You're back in action after {minutes} minutes and {seconds} seconds of workout")
-    
+            paused = not paused  # Toggle pause state
+            if paused:
+                pause_start_time = time.time()
+                speak("Session paused. Press P to resume.")
+            else:
+                speak(f"Session resumed! You are at {minutes} minutes {seconds} seconds.")
+                timer_start += time.time() - pause_start_time  # Adjust timer to maintain elapsed time
+                
+
+# Add a pause loop inside the while loop
+        while paused:
+            key = cv2.waitKey(10) & 0xFF
+            if key == ord('p'):
+               speak(f"Session resumed! You are at {minutes} minutes {seconds} seconds.")
+               paused = False
+               timer_start += time.time() - pause_start_time
+               
+               break
+            elif key == ord('q'):
+                cap.release()
+                cv2.destroyAllWindows()
+                exit()
+
     cap.release()
     cv2.destroyAllWindows()

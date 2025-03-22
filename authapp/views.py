@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
-from authapp.models import Contact,MembershipPlan,Trainer,Enrollment,Gallery,Attendance,Biceptricep,BicepCurl,ShoulderPress,TricepDip,TricepPushdown,Legs,Squat,Deadlift,Chests,Body,Pushup,Lateralraise,Russiantwist,Lateralpulldown,Legraise,Shoulder,Benchpress,Hammercurl,Pullup,Inclinebenchpress,Declinebenchpress,Chestflymachine,Romaniandeadlift,Plank,Tbarrow,Hipthrust,Legextension
+from authapp.models import Contact,MembershipPlan,Trainer,Enrollment,Gallery,Attendance,Biceptricep,BicepCurl,ShoulderPress,TricepDip,TricepPushdown,Legs,Squat,Deadlift,Chests,Body,Pushup,Lateralraise,Russiantwist,Lateralpulldown,Legraise,Shoulder,Benchpress,Hammercurl,Pullup,Inclinebenchpress,Declinebenchpress,Chestflymachine,Romaniandeadlift,Plank,Tbarrow,Hipthrust,Legextension,BMICalculator,HealthData
 import os
 import subprocess
 from django.http import HttpResponse
@@ -52,7 +52,7 @@ def profile(request):
         return redirect('/login')
 
 
-def profile_view(request):
+def profile(request):
     # Fetch user data and attendance (already present)
     posts = User.objects.all()  # Replace with your actual user query
     attendance = Attendance.objects.all()  # Replace with your actual attendance query
@@ -176,6 +176,42 @@ def enroll(request):
 
 
     return render(request,"enroll.html",context)
+
+
+def bmi_calculator(request):
+    bmi = None
+    category = None
+
+    if request.method == "POST":
+        weight = request.POST.get("weight")
+        height = request.POST.get("height")
+
+        try:
+            weight = float(weight)
+            height = float(height)
+
+            if height > 0 and weight > 0:
+                bmi = weight / (height ** 2)
+
+                if bmi < 18.5:
+                    category = "Underweight"
+                elif 18.5 <= bmi < 24.9:
+                    category = "Normal weight"
+                elif 25 <= bmi < 29.9:
+                    category = "Overweight"
+                else:
+                    category = "Obese"
+                
+                bmi = round(bmi, 2)
+
+        except ValueError:
+            bmi = None
+            category = "Invalid input"
+
+    return render(request, "bmi.html", {"bmi": bmi, "category": category})
+
+
+
 
 def biceps_pose(request):
     # Construct the absolute path to the biceps.py script

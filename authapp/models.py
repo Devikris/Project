@@ -9,7 +9,15 @@ class HealthData(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.heart_rate} bpm"
+class BMICalculator(models.Model):
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)  # Optional: Link to user
+    weight = models.FloatField()
+    height = models.FloatField()
+    bmi = models.FloatField()
+    category = models.CharField(max_length=20)
 
+    def __str__(self):
+        return f"{self.user} - BMI: {self.bmi}"
 
 # Create your models here.
 # this file creates database tables
@@ -92,6 +100,7 @@ class ExerciseLog(models.Model):
     exercise_name = models.CharField(max_length=100)
     repetitions = models.IntegerField()
     date = models.DateField(auto_now_add=True)
+
 
 class Biceptricep(models.Model):
     name=models.CharField(max_length=100)
@@ -186,3 +195,4 @@ class Hipthrust(models.Model):
 class Legextension(models.Model):
     name=models.CharField(max_length=100)
     category=models.CharField(max_length=50)
+

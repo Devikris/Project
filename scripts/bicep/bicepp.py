@@ -95,7 +95,6 @@ for i in range(cool_off_seconds, 0, -1):
         cap.release()
         cv2.destroyAllWindows()
         exit()
-    
 speak("Start!")
 timer_start = time.time()
 
@@ -164,9 +163,9 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                     else:
                         feedback_counts[predicted_feedback] = 1
 
-                    if "Great form! You're reaching the top range!" in predicted_feedback:
+                    if "Great" in predicted_feedback:
                         correct_count += 1
-                    elif "Perfect bicep curl form!" in predicted_feedback:
+                    elif "Perfect" in predicted_feedback:
                         correct_count += 1
                     elif "Okay" in predicted_feedback: 
                         correct_count += 1
@@ -206,7 +205,14 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             except Exception as e:
                 print("Error:", e)
 
-           
+            # cv2.rectangle(image, (0, 0), (225, 73), (245, 117, 16), -1)
+            # cv2.putText(image, 'REPETITIONS', (15, 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+            # cv2.putText(image, str(counter), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2)
+            # minutes, seconds = divmod(elapsed_time, 60)
+            # timer_text = f"{minutes:02}:{seconds:02}"
+            # cv2.putText(image, timer_text, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (50, 50, 50), 2)
+
+            # cv2.imshow('Mediapipe Feed', image)
 
         key = cv2.waitKey(10) & 0xFF
         if key == ord('q'):
@@ -234,7 +240,10 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
             cv2.imshow('Mediapipe Feed', frame)
             speak(f"While performing the session in future, consider to {most_frequent_feedback}")
+            cv2.putText(frame, "Press Q to see Performance Graph.", (500, 700), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
             speak("Press Q to move to see the  Performance graph")
+            cv2.imshow('Mediapipe Feed', frame)
+            
 
             while True:
                 key = cv2.waitKey(10) & 0xFF
@@ -245,7 +254,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                     cv2.destroyAllWindows()
                     exit()
 
-           
+            
             
         elif key == ord('p'):
             paused = not paused  # Toggle pause state
